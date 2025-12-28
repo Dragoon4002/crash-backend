@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h3>WS Test</h3>
+  <script>
+    const ws = new WebSocket("ws://localhost:8080/ws");
+    let logged = false;
+    ws.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+
+      // if (!logged) {
+        console.log("Multiplier:", data);
+        logged = true;
+      // }
+    };
+
+    ws.onopen = () => {
+      console.log("Connected");
+    };
+
+    ws.onclose = () => {
+      console.log("Disconnected");
+    };
+  </script>
+</body>
+</html>
