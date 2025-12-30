@@ -5193,3 +5193,163 @@ redis: 2025/12/30 14:10:39 pool.go:419: redis: connection pool: failed to dial a
 2025/12/31 02:43:17 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
 2025/12/31 02:43:17 🧹 Cleaned up crash game 1767129179 (0 players)
 2025/12/31 02:43:17 ✅ Stored crash history - Game: 20251231-024259.248, Peak: 1.57x, Rugged: true
+2025/12/31 02:44:23 🎲 Crash game 20251231-024332.268 finished - Peak: 1.07x, Rugged: true
+2025/12/31 02:44:23 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:44:23 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:44:24 ✅ Stored crash history - Game: 20251231-024332.268, Peak: 1.07x, Rugged: true
+2025/12/31 02:44:24 🧹 Cleaned up crash game 1767129212 (0 players)
+2025/12/31 02:45:11 🎲 Crash game 20251231-024438.834 finished - Peak: 1.12x, Rugged: true
+2025/12/31 02:45:11 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:45:11 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:45:11 🧹 Cleaned up crash game 1767129278 (0 players)
+2025/12/31 02:45:11 ✅ Stored crash history - Game: 20251231-024438.834, Peak: 1.12x, Rugged: true
+2025/12/31 02:47:40 🎲 Crash game 20251231-024526.378 finished - Peak: 1.59x, Rugged: true
+2025/12/31 02:47:40 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:47:40 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:47:40 🧹 Cleaned up crash game 1767129326 (0 players)
+2025/12/31 02:47:40 ✅ Stored crash history - Game: 20251231-024526.378, Peak: 1.59x, Rugged: true
+2025/12/31 02:48:05 🎲 Crash game 20251231-024755.060 finished - Peak: 1.03x, Rugged: true
+2025/12/31 02:48:05 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:48:05 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:48:05 🧹 Cleaned up crash game 1767129475 (0 players)
+2025/12/31 02:48:05 ✅ Stored crash history - Game: 20251231-024755.060, Peak: 1.03x, Rugged: true
+2025/12/31 02:48:46 🎲 Crash game 20251231-024820.077 finished - Peak: 4.45x, Rugged: true
+2025/12/31 02:48:46 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:48:46 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:48:46 🧹 Cleaned up crash game 1767129500 (0 players)
+2025/12/31 02:48:47 ✅ Stored crash history - Game: 20251231-024820.077, Peak: 4.45x, Rugged: true
+2025/12/31 02:49:33 🎲 Crash game 20251231-024901.623 finished - Peak: 7.68x, Rugged: true
+2025/12/31 02:49:33 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:49:33 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:49:33 🧹 Cleaned up crash game 1767129541 (0 players)
+2025/12/31 02:49:33 ✅ Stored crash history - Game: 20251231-024901.623, Peak: 7.68x, Rugged: true
+2025/12/31 02:50:04 🎲 Crash game 20251231-024948.162 finished - Peak: 1.03x, Rugged: true
+2025/12/31 02:50:04 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:50:04 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:50:04 🧹 Cleaned up crash game 1767129588 (0 players)
+2025/12/31 02:50:04 ✅ Stored crash history - Game: 20251231-024948.162, Peak: 1.03x, Rugged: true
+2025/12/31 02:51:30 🎲 Crash game 20251231-025019.185 finished - Peak: 8.88x, Rugged: true
+2025/12/31 02:51:30 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:51:30 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:51:30 🧹 Cleaned up crash game 1767129619 (0 players)
+2025/12/31 02:51:31 ✅ Stored crash history - Game: 20251231-025019.185, Peak: 8.88x, Rugged: true
+2025/12/31 02:52:26 🎲 Crash game 20251231-025145.770 finished - Peak: 3.25x, Rugged: true
+2025/12/31 02:52:26 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:52:26 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:52:27 ✅ Stored crash history - Game: 20251231-025145.770, Peak: 3.25x, Rugged: true
+2025/12/31 02:52:27 🧹 Cleaned up crash game 1767129705 (0 players)
+2025/12/31 02:54:41 🎲 Crash game 20251231-025241.825 finished - Peak: 3.73x, Rugged: true
+2025/12/31 02:54:41 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:54:41 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:54:42 🧹 Cleaned up crash game 1767129761 (0 players)
+2025/12/31 02:54:42 ✅ Stored crash history - Game: 20251231-025241.825, Peak: 3.73x, Rugged: true
+2025/12/31 02:55:02 🎲 Crash game 20251231-025456.975 finished - Peak: 1.39x, Rugged: true
+2025/12/31 02:55:02 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:55:02 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:55:03 🧹 Cleaned up crash game 1767129896 (0 players)
+2025/12/31 02:55:03 ✅ Stored crash history - Game: 20251231-025456.975, Peak: 1.39x, Rugged: true
+2025/12/31 02:55:26 🎲 Crash game 20251231-025517.992 finished - Peak: 1.44x, Rugged: true
+2025/12/31 02:55:26 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:55:26 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:55:26 🧹 Cleaned up crash game 1767129917 (0 players)
+2025/12/31 02:55:26 ✅ Stored crash history - Game: 20251231-025517.992, Peak: 1.44x, Rugged: true
+2025/12/31 02:56:47 🎲 Crash game 20251231-025541.005 finished - Peak: 1.43x, Rugged: true
+2025/12/31 02:56:47 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:56:47 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:56:47 🧹 Cleaned up crash game 1767129941 (0 players)
+2025/12/31 02:56:47 ✅ Stored crash history - Game: 20251231-025541.005, Peak: 1.43x, Rugged: true
+2025/12/31 02:57:17 🎲 Crash game 20251231-025702.107 finished - Peak: 1.58x, Rugged: true
+2025/12/31 02:57:17 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:57:17 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:57:17 🧹 Cleaned up crash game 1767130022 (0 players)
+2025/12/31 02:57:17 ✅ Stored crash history - Game: 20251231-025702.107, Peak: 1.58x, Rugged: true
+2025/12/31 02:57:36 🎲 Crash game 20251231-025732.627 finished - Peak: 1.01x, Rugged: true
+2025/12/31 02:57:36 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:57:36 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:57:36 🧹 Cleaned up crash game 1767130052 (0 players)
+2025/12/31 02:57:36 ✅ Stored crash history - Game: 20251231-025732.627, Peak: 1.01x, Rugged: true
+2025/12/31 02:58:36 🎲 Crash game 20251231-025751.636 finished - Peak: 1.93x, Rugged: true
+2025/12/31 02:58:36 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:58:36 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:58:36 🧹 Cleaned up crash game 1767130071 (0 players)
+2025/12/31 02:58:36 ✅ Stored crash history - Game: 20251231-025751.636, Peak: 1.93x, Rugged: true
+2025/12/31 02:59:35 🎲 Crash game 20251231-025851.198 finished - Peak: 1.09x, Rugged: true
+2025/12/31 02:59:35 📜 Broadcasted updated crash history (10 games)
+2025/12/31 02:59:35 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 02:59:35 🧹 Cleaned up crash game 1767130131 (0 players)
+2025/12/31 02:59:35 ✅ Stored crash history - Game: 20251231-025851.198, Peak: 1.09x, Rugged: true
+2025/12/31 03:00:13 🎲 Crash game 20251231-025950.261 finished - Peak: 2.38x, Rugged: true
+2025/12/31 03:00:13 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:00:13 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:00:13 🧹 Cleaned up crash game 1767130190 (0 players)
+2025/12/31 03:00:13 ✅ Stored crash history - Game: 20251231-025950.261, Peak: 2.38x, Rugged: true
+2025/12/31 03:00:37 🎲 Crash game 20251231-030028.289 finished - Peak: 1.15x, Rugged: true
+2025/12/31 03:00:37 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:00:37 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:00:37 🧹 Cleaned up crash game 1767130228 (0 players)
+2025/12/31 03:00:38 ✅ Stored crash history - Game: 20251231-030028.289, Peak: 1.15x, Rugged: true
+2025/12/31 03:01:00 🎲 Crash game 20251231-030052.805 finished - Peak: 1.05x, Rugged: true
+2025/12/31 03:01:00 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:01:00 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:01:00 🧹 Cleaned up crash game 1767130252 (0 players)
+2025/12/31 03:01:01 ✅ Stored crash history - Game: 20251231-030052.805, Peak: 1.05x, Rugged: true
+2025/12/31 03:02:00 🎲 Crash game 20251231-030115.814 finished - Peak: 3.04x, Rugged: true
+2025/12/31 03:02:00 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:02:00 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:02:00 🧹 Cleaned up crash game 1767130275 (0 players)
+2025/12/31 03:02:01 ✅ Stored crash history - Game: 20251231-030115.814, Peak: 3.04x, Rugged: true
+2025/12/31 03:02:18 🎲 Crash game 20251231-030215.370 finished - Peak: 1.43x, Rugged: true
+2025/12/31 03:02:18 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:02:18 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:02:18 🧹 Cleaned up crash game 1767130335 (0 players)
+2025/12/31 03:02:19 ✅ Stored crash history - Game: 20251231-030215.370, Peak: 1.43x, Rugged: true
+2025/12/31 03:02:46 🎲 Crash game 20251231-030233.880 finished - Peak: 1.45x, Rugged: true
+2025/12/31 03:02:46 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:02:46 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:02:46 🧹 Cleaned up crash game 1767130353 (0 players)
+2025/12/31 03:02:47 ✅ Stored crash history - Game: 20251231-030233.880, Peak: 1.45x, Rugged: true
+2025/12/31 03:04:15 🎲 Crash game 20251231-030301.900 finished - Peak: 3.54x, Rugged: true
+2025/12/31 03:04:15 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:04:15 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:04:15 🧹 Cleaned up crash game 1767130381 (0 players)
+2025/12/31 03:04:15 ✅ Stored crash history - Game: 20251231-030301.900, Peak: 3.54x, Rugged: true
+2025/12/31 03:04:41 🎲 Crash game 20251231-030430.492 finished - Peak: 1.03x, Rugged: true
+2025/12/31 03:04:41 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:04:41 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:04:41 🧹 Cleaned up crash game 1767130470 (0 players)
+2025/12/31 03:04:41 ✅ Stored crash history - Game: 20251231-030430.492, Peak: 1.03x, Rugged: true
+2025/12/31 03:05:23 🎲 Crash game 20251231-030456.511 finished - Peak: 2.86x, Rugged: true
+2025/12/31 03:05:23 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:05:23 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:05:23 🧹 Cleaned up crash game 1767130496 (0 players)
+2025/12/31 03:05:24 ✅ Stored crash history - Game: 20251231-030456.511, Peak: 2.86x, Rugged: true
+2025/12/31 03:07:48 🎲 Crash game 20251231-030538.545 finished - Peak: 1.00x, Rugged: true
+2025/12/31 03:07:48 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:07:48 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:07:48 🧹 Cleaned up crash game 1767130538 (0 players)
+2025/12/31 03:07:49 ✅ Stored crash history - Game: 20251231-030538.545, Peak: 1.00x, Rugged: true
+2025/12/31 03:08:17 🎲 Crash game 20251231-030803.712 finished - Peak: 1.06x, Rugged: true
+2025/12/31 03:08:17 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:08:17 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:08:17 🧹 Cleaned up crash game 1767130683 (0 players)
+2025/12/31 03:08:18 ✅ Stored crash history - Game: 20251231-030803.712, Peak: 1.06x, Rugged: true
+2025/12/31 03:09:57 🎲 Crash game 20251231-030832.732 finished - Peak: 1.04x, Rugged: true
+2025/12/31 03:09:57 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:09:57 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:09:58 ✅ Stored crash history - Game: 20251231-030832.732, Peak: 1.04x, Rugged: true
+2025/12/31 03:09:58 🧹 Cleaned up crash game 1767130712 (0 players)
+2025/12/31 03:13:20 🎲 Crash game 20251231-031012.833 finished - Peak: 1.00x, Rugged: true
+2025/12/31 03:13:20 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:13:20 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:13:20 🧹 Cleaned up crash game 1767130812 (0 players)
+2025/12/31 03:13:20 ✅ Stored crash history - Game: 20251231-031012.833, Peak: 1.00x, Rugged: true
+2025/12/31 03:15:21 🎲 Crash game 20251231-031335.062 finished - Peak: 1.83x, Rugged: true
+2025/12/31 03:15:21 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:15:21 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:15:21 🧹 Cleaned up crash game 1767131015 (0 players)
+2025/12/31 03:15:22 ✅ Stored crash history - Game: 20251231-031335.062, Peak: 1.83x, Rugged: true
+2025/12/31 03:17:18 🎲 Crash game 20251231-031536.695 finished - Peak: 13.05x, Rugged: true
+2025/12/31 03:17:18 📜 Broadcasted updated crash history (10 games)
+2025/12/31 03:17:18 ⚠️  Failed to initialize contract client: failed to read ABI file: open contract/GameHouseV2.json: no such file or directory
+2025/12/31 03:17:18 🧹 Cleaned up crash game 1767131136 (0 players)
+2025/12/31 03:17:18 ✅ Stored crash history - Game: 20251231-031536.695, Peak: 13.05x, Rugged: true

@@ -23,7 +23,7 @@ const (
 	MantleSepoliaRPC = "https://rpc.sepolia.mantle.xyz"
 
 	// Contract address (GameHouseV3)
-	ContractAddress = "0x80Fc067cDDCDE4a78199a7A6751F2f629654b93A"
+	ContractAddress = ""
 
 	// Chain ID for Mantle Sepolia
 	ChainID = 5003
