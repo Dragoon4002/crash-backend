@@ -1,0 +1,421 @@
+2025/12/30 04:06:38 🚀 Unified Event Hub started
+2025/12/30 04:06:38 ✅ Loaded environment variables from .env
+2025/12/30 04:06:38 🔌 Connecting to Redis...
+2025/12/30 04:06:38 🎰 Crash game loop started
+2025/12/30 04:06:38 ✅ Redis connected successfully - URL: redis-10994.c212.ap-south-1-1.ec2.cloud.redislabs.com:10994
+2025/12/30 04:06:38 🔌 Connecting to PostgreSQL (Supabase)...
+2025/12/30 04:06:40 ✅ PostgreSQL connected successfully (Supabase)
+2025/12/30 04:06:40 📋 Initializing database schema...
+2025/12/30 04:06:40 ✅ Database schema initialized
+2025/12/30 04:06:40 🚀 Server starting on 0.0.0.0:8080
+2025/12/30 04:06:40 
+2025/12/30 04:06:40 📡 WebSocket Endpoints:
+2025/12/30 04:06:40    ws://localhost:8080/ws
+2025/12/30 04:06:40    - Subscribe to 'crash' for crash game + history
+2025/12/30 04:06:40    - Subscribe to 'chat' for server chat
+2025/12/30 04:06:40    - Subscribe to 'rooms' for global rooms
+2025/12/30 04:06:40    - Subscribe to 'candleflip:<roomId>' for specific room
+2025/12/30 04:06:40 
+2025/12/30 04:06:40 🎮 Crash Game API:
+2025/12/30 04:06:40    POST /api/crash/register - Register a crash bet
+2025/12/30 04:06:40    POST /api/crash/cashout - Cash out (gasless)
+2025/12/30 04:06:40 
+2025/12/30 04:06:40 🎲 CandleFlip API:
+2025/12/30 04:06:40    POST /api/candle/register - Register a candleflip game
+2025/12/30 04:06:40    POST /api/candle/preview-odds - Preview odds
+2025/12/30 04:06:40 
+2025/12/30 04:06:40 🔍 Verification:
+2025/12/30 04:06:40    GET /api/verify/:gameId - Verify crash game
+2025/12/30 04:06:40    GET /api/health - Health check
+2025/12/30 04:06:40 
+2025/12/30 04:06:40 📥 Unified WebSocket connection from: [::1]:36896
+2025/12/30 04:06:40 ✅ Client registered: 1767047800-1 (Total: 1)
+2025/12/30 04:06:40 📡 Client 1767047800-1 subscribed to: crash
+2025/12/30 04:06:40 📥 Unified WebSocket connection from: [::1]:36910
+2025/12/30 04:06:40 ✅ Client registered: 1767047800-2 (Total: 2)
+2025/12/30 04:06:40 📡 Client 1767047800-2 subscribed to: crash
+2025/12/30 04:06:40 📥 Unified WebSocket connection from: [::1]:36912
+2025/12/30 04:06:40 ✅ Client registered: 1767047800-3 (Total: 3)
+2025/12/30 04:06:40 📡 Client 1767047800-3 subscribed to: crash
+2025/12/30 04:06:40 📥 Unified WebSocket connection from: [::1]:36924
+2025/12/30 04:06:40 ✅ Client registered: 1767047800-4 (Total: 4)
+2025/12/30 04:06:40 📡 Client 1767047800-4 subscribed to: crash
+2025/12/30 04:06:41 📥 Unified WebSocket connection from: [::1]:36940
+2025/12/30 04:06:41 ✅ Client registered: 1767047801-5 (Total: 5)
+2025/12/30 04:06:41 📡 Client 1767047801-5 subscribed to: crash
+2025/12/30 04:06:41 📥 Unified WebSocket connection from: [::1]:36956
+2025/12/30 04:06:41 ✅ Client registered: 1767047801-6 (Total: 6)
+2025/12/30 04:06:41 📡 Client 1767047801-6 subscribed to: crash
+2025/12/30 04:06:41 📥 Unified WebSocket connection from: [::1]:36966
+2025/12/30 04:06:41 ✅ Client registered: 1767047801-7 (Total: 7)
+2025/12/30 04:06:41 📡 Client 1767047801-7 subscribed to: chat
+2025/12/30 04:06:41 📨 Client 1767047801-7 joined chat (sent 0 history messages)
+2025/12/30 04:06:41 📡 Client 1767047801-7 subscribed to: crash
+2025/12/30 04:13:29 🎲 Crash game 20251230-040638.646 finished - Peak: 9.28x, Rugged: true
+2025/12/30 04:13:29 📜 Broadcasted updated crash history (1 games)
+2025/12/30 04:13:29 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:13:29 🧹 Cleaned up crash game 1767047798 (0 players)
+2025/12/30 04:13:30 ✅ Stored crash history - Game: 20251230-040638.646, Peak: 9.28x, Rugged: true
+2025/12/30 04:13:31 📊 Estimated gas: 166740492, using: 200088590
+2025/12/30 04:13:31 🔨 Calling rugGame(gameId=1767047798)...
+2025/12/30 04:13:31 ✅ rugGame transaction sent: 0x5726ad1f8e5d96d189cafac085de88e1109e2ed060dd03dfd17ec5974962ad64
+2025/12/30 04:13:40 ✅ rugGame confirmed in block 32751771
+2025/12/30 04:13:40 ✅ rugGame called on contract - TX: 0x5726ad1f8e5d96d189cafac085de88e1109e2ed060dd03dfd17ec5974962ad64
+2025/12/30 04:14:15 🎲 Crash game 20251230-041344.615 finished - Peak: 1.03x, Rugged: true
+2025/12/30 04:14:15 📜 Broadcasted updated crash history (2 games)
+2025/12/30 04:14:15 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:14:15 🧹 Cleaned up crash game 1767048224 (0 players)
+2025/12/30 04:14:16 ✅ Stored crash history - Game: 20251230-041344.615, Peak: 1.03x, Rugged: true
+2025/12/30 04:14:16 📊 Estimated gas: 166736985, using: 200084382
+2025/12/30 04:14:16 🔨 Calling rugGame(gameId=1767048224)...
+2025/12/30 04:14:16 ✅ rugGame transaction sent: 0xc51ee98525685d7bfbfa4ea6fc8be2ee517741a043344498bebb5e8859376a2b
+2025/12/30 04:14:21 ✅ rugGame confirmed in block 32751793
+2025/12/30 04:14:21 ✅ rugGame called on contract - TX: 0xc51ee98525685d7bfbfa4ea6fc8be2ee517741a043344498bebb5e8859376a2b
+2025/12/30 04:15:17 🎲 Crash game 20251230-041430.649 finished - Peak: 7.12x, Rugged: true
+2025/12/30 04:15:17 📜 Broadcasted updated crash history (3 games)
+2025/12/30 04:15:17 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:15:17 🧹 Cleaned up crash game 1767048270 (0 players)
+2025/12/30 04:15:17 ✅ Stored crash history - Game: 20251230-041430.649, Peak: 7.12x, Rugged: true
+2025/12/30 04:15:18 📊 Estimated gas: 166895269, using: 200274322
+2025/12/30 04:15:18 🔨 Calling rugGame(gameId=1767048270)...
+2025/12/30 04:15:19 ✅ rugGame transaction sent: 0xcf049a1c775617cf93248cb100ddd18f304b48036a0d54ff1022a5252f31a255
+2025/12/30 04:15:24 ✅ rugGame confirmed in block 32751825
+2025/12/30 04:15:24 ✅ rugGame called on contract - TX: 0xcf049a1c775617cf93248cb100ddd18f304b48036a0d54ff1022a5252f31a255
+2025/12/30 04:15:41 🎲 Crash game 20251230-041532.209 finished - Peak: 1.03x, Rugged: true
+2025/12/30 04:15:41 📜 Broadcasted updated crash history (4 games)
+2025/12/30 04:15:41 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:15:41 🧹 Cleaned up crash game 1767048332 (0 players)
+2025/12/30 04:15:42 ✅ Stored crash history - Game: 20251230-041532.209, Peak: 1.03x, Rugged: true
+2025/12/30 04:15:42 📊 Estimated gas: 166891759, using: 200270110
+2025/12/30 04:15:42 🔨 Calling rugGame(gameId=1767048332)...
+2025/12/30 04:15:42 ✅ rugGame transaction sent: 0x9b21ad7661bc925062d361ac92bb2e64b885012262feca64638044f43704ead0
+2025/12/30 04:15:48 ✅ rugGame confirmed in block 32751836
+2025/12/30 04:15:48 ✅ rugGame called on contract - TX: 0x9b21ad7661bc925062d361ac92bb2e64b885012262feca64638044f43704ead0
+2025/12/30 04:16:09 🎲 Crash game 20251230-041556.723 finished - Peak: 1.06x, Rugged: true
+2025/12/30 04:16:09 📜 Broadcasted updated crash history (5 games)
+2025/12/30 04:16:09 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:16:09 🧹 Cleaned up crash game 1767048356 (0 players)
+2025/12/30 04:16:09 ✅ Stored crash history - Game: 20251230-041556.723, Peak: 1.06x, Rugged: true
+2025/12/30 04:16:09 📊 Estimated gas: 166719453, using: 200063343
+2025/12/30 04:16:09 🔨 Calling rugGame(gameId=1767048356)...
+2025/12/30 04:16:10 ✅ rugGame transaction sent: 0x93c68b3233bac4d6c5ffdac94e3e897046f2efde6e0559232b9ffe93533781fb
+2025/12/30 04:16:14 ✅ rugGame confirmed in block 32751850
+2025/12/30 04:16:14 ✅ rugGame called on contract - TX: 0x93c68b3233bac4d6c5ffdac94e3e897046f2efde6e0559232b9ffe93533781fb
+2025/12/30 04:16:27 🎲 Crash game 20251230-041624.241 finished - Peak: 1.00x, Rugged: true
+2025/12/30 04:16:27 📜 Broadcasted updated crash history (6 games)
+2025/12/30 04:16:27 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:16:27 ❌ Read error for client 1767047801-7: websocket: close 1000 (normal)
+2025/12/30 04:16:27 👋 Client unregistered: 1767047801-7 (Total: 6)
+2025/12/30 04:16:27 ❌ Read error for client 1767047800-3: websocket: close 1005 (no status)
+2025/12/30 04:16:27 👋 Client unregistered: 1767047800-3 (Total: 5)
+2025/12/30 04:16:27 🧹 Cleaned up crash game 1767048384 (0 players)
+2025/12/30 04:16:27 ✅ Stored crash history - Game: 20251230-041624.241, Peak: 1.00x, Rugged: true
+2025/12/30 04:16:28 📊 Estimated gas: 166715947, using: 200059136
+2025/12/30 04:16:28 🔨 Calling rugGame(gameId=1767048384)...
+2025/12/30 04:16:28 ✅ rugGame transaction sent: 0xc946ef631b22de65052991a84f8f265a9685393c2767f1d707458252251fafd6
+2025/12/30 04:16:30 📥 Unified WebSocket connection from: [::1]:53090
+2025/12/30 04:16:30 ✅ Client registered: 1767048390-8 (Total: 6)
+2025/12/30 04:16:30 📡 Client 1767048390-8 subscribed to: crash
+2025/12/30 04:16:33 ✅ rugGame confirmed in block 32751859
+2025/12/30 04:16:33 ✅ rugGame called on contract - TX: 0xc946ef631b22de65052991a84f8f265a9685393c2767f1d707458252251fafd6
+2025/12/30 04:16:45 🎲 Crash game 20251230-041642.245 finished - Peak: 1.04x, Rugged: true
+2025/12/30 04:16:45 📜 Broadcasted updated crash history (7 games)
+2025/12/30 04:16:45 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:16:45 🧹 Cleaned up crash game 1767048402 (0 players)
+2025/12/30 04:16:46 ✅ Stored crash history - Game: 20251230-041642.245, Peak: 1.04x, Rugged: true
+2025/12/30 04:16:46 📊 Estimated gas: 166712440, using: 200054928
+2025/12/30 04:16:46 🔨 Calling rugGame(gameId=1767048402)...
+2025/12/30 04:16:46 ✅ rugGame transaction sent: 0x80b65a235ea311f6519525a1a54ef23cfeb797ce8b07191ee0c2426a19fbc5c0
+2025/12/30 04:16:52 ✅ rugGame confirmed in block 32751868
+2025/12/30 04:16:52 ✅ rugGame called on contract - TX: 0x80b65a235ea311f6519525a1a54ef23cfeb797ce8b07191ee0c2426a19fbc5c0
+2025/12/30 04:16:58 🔍 Game verification - Game: 20251230-040638.646
+2025/12/30 04:18:28 🎲 Crash game 20251230-041700.748 finished - Peak: 1.01x, Rugged: true
+2025/12/30 04:18:28 📜 Broadcasted updated crash history (8 games)
+2025/12/30 04:18:28 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:18:28 🧹 Cleaned up crash game 1767048420 (0 players)
+2025/12/30 04:18:28 ✅ Stored crash history - Game: 20251230-041700.748, Peak: 1.01x, Rugged: true
+2025/12/30 04:18:30 📊 Estimated gas: 166708934, using: 200050720
+2025/12/30 04:18:30 🔨 Calling rugGame(gameId=1767048420)...
+2025/12/30 04:18:30 ✅ rugGame transaction sent: 0xa99dd258beeeed7f1a27c33e570c1a05f040aa084991a0c3126719d8fe923a0f
+2025/12/30 04:18:33 ✅ rugGame confirmed in block 32751920
+2025/12/30 04:18:33 ✅ rugGame called on contract - TX: 0xa99dd258beeeed7f1a27c33e570c1a05f040aa084991a0c3126719d8fe923a0f
+2025/12/30 04:19:06 🎲 Crash game 20251230-041843.343 finished - Peak: 1.17x, Rugged: true
+2025/12/30 04:19:06 📜 Broadcasted updated crash history (9 games)
+2025/12/30 04:19:06 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:19:07 📊 Estimated gas: 166705428, using: 200046513
+2025/12/30 04:19:07 🔨 Calling rugGame(gameId=1767048523)...
+2025/12/30 04:19:07 ✅ rugGame transaction sent: 0xd505932d8b3549640c7084977e81f07aa83bb6ecd981eb2fd195b57ce609e80c
+2025/12/30 04:19:07 ✅ Stored crash history - Game: 20251230-041843.343, Peak: 1.17x, Rugged: true
+2025/12/30 04:19:08 🧹 Cleaned up crash game 1767048523 (0 players)
+2025/12/30 04:19:13 ✅ rugGame confirmed in block 32751939
+2025/12/30 04:19:13 ✅ rugGame called on contract - TX: 0xd505932d8b3549640c7084977e81f07aa83bb6ecd981eb2fd195b57ce609e80c
+2025/12/30 04:19:25 🎲 Crash game 20251230-041921.877 finished - Peak: 1.00x, Rugged: true
+2025/12/30 04:19:25 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:19:25 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:19:25 🧹 Cleaned up crash game 1767048561 (0 players)
+2025/12/30 04:19:25 ✅ Stored crash history - Game: 20251230-041921.877, Peak: 1.00x, Rugged: true
+2025/12/30 04:19:26 📊 Estimated gas: 166701921, using: 200042305
+2025/12/30 04:19:26 🔨 Calling rugGame(gameId=1767048561)...
+2025/12/30 04:19:26 ✅ rugGame transaction sent: 0xa200417464578db8a4e6716a2c59fe166e97c35b54ab7a7ac096c8803e95f981
+2025/12/30 04:19:29 ✅ rugGame confirmed in block 32751948
+2025/12/30 04:19:29 ✅ rugGame called on contract - TX: 0xa200417464578db8a4e6716a2c59fe166e97c35b54ab7a7ac096c8803e95f981
+2025/12/30 04:19:44 🎲 Crash game 20251230-041940.381 finished - Peak: 1.00x, Rugged: true
+2025/12/30 04:19:44 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:19:44 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:19:44 🧹 Cleaned up crash game 1767048580 (0 players)
+2025/12/30 04:19:44 ✅ Stored crash history - Game: 20251230-041940.381, Peak: 1.00x, Rugged: true
+2025/12/30 04:19:45 📊 Estimated gas: 166870699, using: 200244838
+2025/12/30 04:19:45 🔨 Calling rugGame(gameId=1767048580)...
+2025/12/30 04:19:45 ✅ rugGame transaction sent: 0x579b7bb0a84ca8b1fbbd002a16b2ab67f58a19971eafd76b96510f0637f34eb5
+2025/12/30 04:19:50 ✅ rugGame confirmed in block 32751958
+2025/12/30 04:19:50 ✅ rugGame called on contract - TX: 0x579b7bb0a84ca8b1fbbd002a16b2ab67f58a19971eafd76b96510f0637f34eb5
+2025/12/30 04:20:52 🎲 Crash game 20251230-041959.392 finished - Peak: 11.12x, Rugged: true
+2025/12/30 04:20:52 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:20:52 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:20:52 🧹 Cleaned up crash game 1767048599 (0 players)
+2025/12/30 04:20:52 ✅ Stored crash history - Game: 20251230-041959.392, Peak: 11.12x, Rugged: true
+2025/12/30 04:20:53 📊 Estimated gas: 166694908, using: 200033889
+2025/12/30 04:20:53 🔨 Calling rugGame(gameId=1767048599)...
+2025/12/30 04:20:54 ✅ rugGame transaction sent: 0x60aa62a2087ad828c2fc71e019853e1343fd85e13a5101517e9b32c3a11d3cd7
+2025/12/30 04:21:05 ✅ rugGame confirmed in block 32751992
+2025/12/30 04:21:05 ✅ rugGame called on contract - TX: 0x60aa62a2087ad828c2fc71e019853e1343fd85e13a5101517e9b32c3a11d3cd7
+2025/12/30 04:21:58 🎲 Crash game 20251230-042107.448 finished - Peak: 2.31x, Rugged: true
+2025/12/30 04:21:58 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:21:58 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:21:58 🧹 Cleaned up crash game 1767048667 (0 players)
+2025/12/30 04:21:58 ✅ Stored crash history - Game: 20251230-042107.448, Peak: 2.31x, Rugged: true
+2025/12/30 04:21:58 📊 Estimated gas: 166701921, using: 200042305
+2025/12/30 04:21:58 🔨 Calling rugGame(gameId=1767048667)...
+2025/12/30 04:21:59 ✅ rugGame transaction sent: 0x68dca3e5b19125edb56bb7bd227b90e90e6af8dcadf0b6bedd1b191e21274e87
+2025/12/30 04:22:05 ✅ rugGame confirmed in block 32752025
+2025/12/30 04:22:05 ✅ rugGame called on contract - TX: 0x68dca3e5b19125edb56bb7bd227b90e90e6af8dcadf0b6bedd1b191e21274e87
+2025/12/30 04:22:18 🎲 Crash game 20251230-042213.005 finished - Peak: 1.02x, Rugged: true
+2025/12/30 04:22:18 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:22:18 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:22:18 🧹 Cleaned up crash game 1767048733 (0 players)
+2025/12/30 04:22:18 ✅ Stored crash history - Game: 20251230-042213.005, Peak: 1.02x, Rugged: true
+2025/12/30 04:22:20 📊 Estimated gas: 166708934, using: 200050720
+2025/12/30 04:22:20 🔨 Calling rugGame(gameId=1767048733)...
+2025/12/30 04:22:20 ✅ rugGame transaction sent: 0x87ee80fcb53f32d62e7517897ac2d5127dc0653e8d7d6e28fd2de9dd425f36fe
+2025/12/30 04:22:23 ✅ rugGame confirmed in block 32752035
+2025/12/30 04:22:23 ✅ rugGame called on contract - TX: 0x87ee80fcb53f32d62e7517897ac2d5127dc0653e8d7d6e28fd2de9dd425f36fe
+2025/12/30 04:22:53 🎲 Crash game 20251230-042233.515 finished - Peak: 1.36x, Rugged: true
+2025/12/30 04:22:53 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:22:53 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:22:53 ✅ Stored crash history - Game: 20251230-042233.515, Peak: 1.36x, Rugged: true
+2025/12/30 04:22:53 🧹 Cleaned up crash game 1767048753 (0 players)
+2025/12/30 04:22:55 📊 Estimated gas: 166719453, using: 200063343
+2025/12/30 04:22:55 🔨 Calling rugGame(gameId=1767048753)...
+2025/12/30 04:22:55 ✅ rugGame transaction sent: 0xe2226d8a34d7bfecebf385c24db0b6c04f8ae5221bb71ae1c9010b8bdf04acdc
+2025/12/30 04:22:59 ✅ rugGame confirmed in block 32752053
+2025/12/30 04:22:59 ✅ rugGame called on contract - TX: 0xe2226d8a34d7bfecebf385c24db0b6c04f8ae5221bb71ae1c9010b8bdf04acdc
+2025/12/30 04:23:23 🎲 Crash game 20251230-042308.042 finished - Peak: 1.20x, Rugged: true
+2025/12/30 04:23:23 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:23:23 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:23:23 🧹 Cleaned up crash game 1767048788 (0 players)
+2025/12/30 04:23:23 ✅ Stored crash history - Game: 20251230-042308.042, Peak: 1.20x, Rugged: true
+2025/12/30 04:23:24 📊 Estimated gas: 166726466, using: 200071759
+2025/12/30 04:23:24 🔨 Calling rugGame(gameId=1767048788)...
+2025/12/30 04:23:24 ✅ rugGame transaction sent: 0x7306fd1b8103f99d156372c7fa650856840d41c244397f1f5cc995ef0978a34e
+2025/12/30 04:23:27 ✅ rugGame confirmed in block 32752067
+2025/12/30 04:23:27 ✅ rugGame called on contract - TX: 0x7306fd1b8103f99d156372c7fa650856840d41c244397f1f5cc995ef0978a34e
+2025/12/30 04:25:26 🎲 Crash game 20251230-042338.568 finished - Peak: 13.04x, Rugged: true
+2025/12/30 04:25:26 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:25:26 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:25:26 ✅ Stored crash history - Game: 20251230-042338.568, Peak: 13.04x, Rugged: true
+2025/12/30 04:25:27 🧹 Cleaned up crash game 1767048818 (0 players)
+2025/12/30 04:25:27 📊 Estimated gas: 166567324, using: 199880788
+2025/12/30 04:25:27 🔨 Calling rugGame(gameId=1767048818)...
+2025/12/30 04:25:28 ✅ rugGame transaction sent: 0x473564da2e223a99e0a63cf7732dbc9562746fb9f398a5d954ba318783a32f94
+2025/12/30 04:25:31 ✅ rugGame confirmed in block 32752129
+2025/12/30 04:25:31 ✅ rugGame called on contract - TX: 0x473564da2e223a99e0a63cf7732dbc9562746fb9f398a5d954ba318783a32f94
+2025/12/30 04:26:35 🎲 Crash game 20251230-042541.187 finished - Peak: 1.59x, Rugged: true
+2025/12/30 04:26:35 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:26:35 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:26:35 🧹 Cleaned up crash game 1767048941 (0 players)
+2025/12/30 04:26:35 📊 Estimated gas: 166567324, using: 199880788
+2025/12/30 04:26:35 🔨 Calling rugGame(gameId=1767048941)...
+2025/12/30 04:26:35 ✅ Stored crash history - Game: 20251230-042541.187, Peak: 1.59x, Rugged: true
+2025/12/30 04:26:36 ✅ rugGame transaction sent: 0xde3e21c9c9eaf6557a8f0a9df85424cdd7a72a5fb663067d5932203e3af3c06b
+2025/12/30 04:26:39 ✅ rugGame confirmed in block 32752163
+2025/12/30 04:26:39 ✅ rugGame called on contract - TX: 0xde3e21c9c9eaf6557a8f0a9df85424cdd7a72a5fb663067d5932203e3af3c06b
+2025/12/30 04:26:55 🎲 Crash game 20251230-042650.244 finished - Peak: 1.00x, Rugged: true
+2025/12/30 04:26:55 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:26:55 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:26:55 🧹 Cleaned up crash game 1767049010 (0 players)
+2025/12/30 04:26:56 ✅ Stored crash history - Game: 20251230-042650.244, Peak: 1.00x, Rugged: true
+2025/12/30 04:26:56 📊 Estimated gas: 166563822, using: 199876586
+2025/12/30 04:26:56 🔨 Calling rugGame(gameId=1767049010)...
+2025/12/30 04:26:56 ✅ rugGame transaction sent: 0x698f4c0a7e89f4135a689d333a32b732d3ba7434919a092cc6bf3fcf2cc07f34
+2025/12/30 04:27:00 ✅ rugGame confirmed in block 32752173
+2025/12/30 04:27:00 ✅ rugGame called on contract - TX: 0x698f4c0a7e89f4135a689d333a32b732d3ba7434919a092cc6bf3fcf2cc07f34
+2025/12/30 04:28:12 🎲 Crash game 20251230-042710.760 finished - Peak: 1.20x, Rugged: true
+2025/12/30 04:28:12 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:28:12 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:28:12 🧹 Cleaned up crash game 1767049030 (0 players)
+2025/12/30 04:28:13 ✅ Stored crash history - Game: 20251230-042710.760, Peak: 1.20x, Rugged: true
+2025/12/30 04:28:14 📊 Estimated gas: 166563822, using: 199876586
+2025/12/30 04:28:14 🔨 Calling rugGame(gameId=1767049030)...
+2025/12/30 04:28:14 ✅ rugGame transaction sent: 0x21c22bb2d6386b60fcd5c1c9ac2bfc54ad4e02b2bb935fb7e3e0da6c294b7358
+2025/12/30 04:28:17 ✅ rugGame confirmed in block 32752212
+2025/12/30 04:28:17 ✅ rugGame called on contract - TX: 0x21c22bb2d6386b60fcd5c1c9ac2bfc54ad4e02b2bb935fb7e3e0da6c294b7358
+2025/12/30 04:28:58 🎲 Crash game 20251230-042827.825 finished - Peak: 1.47x, Rugged: true
+2025/12/30 04:28:58 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:28:58 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:28:58 🧹 Cleaned up crash game 1767049107 (0 players)
+2025/12/30 04:28:59 ✅ Stored crash history - Game: 20251230-042827.825, Peak: 1.47x, Rugged: true
+2025/12/30 04:29:00 📊 Estimated gas: 166567324, using: 199880788
+2025/12/30 04:29:00 🔨 Calling rugGame(gameId=1767049107)...
+2025/12/30 04:29:01 ✅ rugGame transaction sent: 0x537b1d8c68a02371446f7ec2496d0cb3498a553f9de2a3da30a2820b67ad0048
+2025/12/30 04:29:25 🎲 Crash game 20251230-042913.860 finished - Peak: 1.00x, Rugged: true
+2025/12/30 04:29:25 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:29:25 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:29:26 ✅ Stored crash history - Game: 20251230-042913.860, Peak: 1.00x, Rugged: true
+2025/12/30 04:29:26 🧹 Cleaned up crash game 1767049153 (0 players)
+2025/12/30 04:29:28 ⚠️  Failed to call rugGame on contract: failed to wait for transaction: context deadline exceeded
+2025/12/30 04:29:55 ⚠️  Gas estimation failed, using default: Post "https://rpc.sepolia.mantle.xyz": context deadline exceeded
+2025/12/30 04:29:55 🔨 Calling rugGame(gameId=1767049153)...
+2025/12/30 04:29:56 ⚠️  Failed to call rugGame on contract: failed to call rugGame: failed to forward tx to sequencer, err: 'intrinsic gas too low: gas 300000, minimum needed 61511040'
+2025/12/30 04:30:33 🎲 Crash game 20251230-042940.873 finished - Peak: 1.16x, Rugged: true
+2025/12/30 04:30:33 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:30:33 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:30:34 ✅ Stored crash history - Game: 20251230-042940.873, Peak: 1.16x, Rugged: true
+2025/12/30 04:30:34 🧹 Cleaned up crash game 1767049180 (0 players)
+2025/12/30 04:30:38 📊 Estimated gas: 166570826, using: 199884991
+2025/12/30 04:30:38 🔨 Calling rugGame(gameId=1767049180)...
+2025/12/30 04:30:38 ✅ rugGame transaction sent: 0x13a7457eb5865e2ad8c30f6128018ed532364610b6e9fb243745d3fed185bc33
+2025/12/30 04:30:49 ✅ rugGame confirmed in block 32752284
+2025/12/30 04:30:49 ✅ rugGame called on contract - TX: 0x13a7457eb5865e2ad8c30f6128018ed532364610b6e9fb243745d3fed185bc33
+2025/12/30 04:30:54 🎲 Crash game 20251230-043048.936 finished - Peak: 1.05x, Rugged: true
+2025/12/30 04:30:54 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:30:54 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:30:54 ✅ Stored crash history - Game: 20251230-043048.936, Peak: 1.05x, Rugged: true
+2025/12/30 04:30:59 🧹 Cleaned up crash game 1767049248 (0 players)
+redis: 2025/12/30 04:31:03 pool.go:419: redis: connection pool: failed to dial after 1 attempts: dial tcp: lookup redis-10994.c212.ap-south-1-1.ec2.cloud.redislabs.com: i/o timeout
+2025/12/30 04:31:18 📊 Estimated gas: 166563822, using: 199876586
+2025/12/30 04:31:18 🔨 Calling rugGame(gameId=1767049248)...
+2025/12/30 04:31:19 ✅ rugGame transaction sent: 0x86d095ecc841873837cd57a906022b68b812e0254cd1fb50ac63f8aedd7d6a26
+2025/12/30 04:31:22 ✅ rugGame confirmed in block 32752304
+2025/12/30 04:31:22 ✅ rugGame called on contract - TX: 0x86d095ecc841873837cd57a906022b68b812e0254cd1fb50ac63f8aedd7d6a26
+2025/12/30 04:31:33 🎲 Crash game 20251230-043109.446 finished - Peak: 1.08x, Rugged: true
+2025/12/30 04:31:33 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:31:33 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 04:31:33 🧹 Cleaned up crash game 1767049269 (0 players)
+2025/12/30 04:31:33 ✅ Stored crash history - Game: 20251230-043109.446, Peak: 1.08x, Rugged: true
+2025/12/30 04:31:34 📊 Estimated gas: 166563822, using: 199876586
+2025/12/30 04:31:34 🔨 Calling rugGame(gameId=1767049269)...
+2025/12/30 04:31:35 ✅ rugGame transaction sent: 0xddd51504addd8e749f69a24f3148a40996fb8a3ae00b42a3cece4163417ac9e1
+redis: 2025/12/30 04:31:38 pool.go:419: redis: connection pool: failed to dial after 1 attempts: dial tcp: lookup redis-10994.c212.ap-south-1-1.ec2.cloud.redislabs.com: i/o timeout
+2025/12/30 04:31:51 ✅ rugGame confirmed in block 32752313
+2025/12/30 04:31:51 ✅ rugGame called on contract - TX: 0xddd51504addd8e749f69a24f3148a40996fb8a3ae00b42a3cece4163417ac9e1
+2025/12/30 04:32:45 👋 Client unregistered: 1767047801-6 (Total: 5)
+2025/12/30 04:32:45 👋 Client unregistered: 1767047801-5 (Total: 4)
+2025/12/30 04:32:45 👋 Client unregistered: 1767047800-1 (Total: 3)
+2025/12/30 04:32:45 👋 Client unregistered: 1767047800-2 (Total: 2)
+2025/12/30 04:32:45 👋 Client unregistered: 1767047800-4 (Total: 1)
+2025/12/30 04:32:45 👋 Client unregistered: 1767048390-8 (Total: 0)
+2025/12/30 04:32:48 📥 Unified WebSocket connection from: [::1]:43250
+2025/12/30 04:32:48 ✅ Client registered: 1767049368-9 (Total: 1)
+2025/12/30 04:32:48 📡 Client 1767049368-9 subscribed to: crash
+2025/12/30 04:32:48 📥 Unified WebSocket connection from: [::1]:43262
+2025/12/30 04:32:48 ✅ Client registered: 1767049368-10 (Total: 2)
+2025/12/30 04:32:48 📡 Client 1767049368-10 subscribed to: crash
+2025/12/30 04:32:48 📥 Unified WebSocket connection from: [::1]:43276
+2025/12/30 04:32:48 ✅ Client registered: 1767049368-11 (Total: 3)
+2025/12/30 04:32:48 📡 Client 1767049368-11 subscribed to: crash
+2025/12/30 04:32:48 📥 Unified WebSocket connection from: [::1]:43282
+2025/12/30 04:32:48 ✅ Client registered: 1767049368-12 (Total: 4)
+2025/12/30 04:32:48 📡 Client 1767049368-12 subscribed to: crash
+2025/12/30 04:32:48 📥 Unified WebSocket connection from: [::1]:43298
+2025/12/30 04:32:48 ✅ Client registered: 1767049368-13 (Total: 5)
+2025/12/30 04:32:48 📡 Client 1767049368-13 subscribed to: crash
+2025/12/30 04:32:48 📥 Unified WebSocket connection from: [::1]:43312
+2025/12/30 04:32:48 ✅ Client registered: 1767049368-14 (Total: 6)
+2025/12/30 04:32:48 📡 Client 1767049368-14 subscribed to: crash
+2025/12/30 04:33:07 🎲 Crash game 20251230-043148.479 finished - Peak: 1.67x, Rugged: true
+2025/12/30 04:33:07 📜 Broadcasted updated crash history (10 games)
+2025/12/30 04:33:07 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+redis: 2025/12/30 04:33:07 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp: lookup redis-10994.c212.ap-south-1-1.ec2.cloud.redislabs.com on 127.0.0.53:53: server misbehaving
+redis: 2025/12/30 04:33:10 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp: lookup redis-10994.c212.ap-south-1-1.ec2.cloud.redislabs.com on 127.0.0.53:53: server misbehaving
+redis: 2025/12/30 04:33:10 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp: lookup redis-10994.c212.ap-south-1-1.ec2.cloud.redislabs.com on 127.0.0.53:53: server misbehaving
+2025/12/30 04:33:13 ⚠️  Failed to cleanup Redis: failed to get active players: context deadline exceeded
+redis: 2025/12/30 04:33:13 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp: lookup redis-10994.c212.ap-south-1-1.ec2.cloud.redislabs.com on 127.0.0.53:53: server misbehaving
+redis: 2025/12/30 04:33:13 pool.go:419: redis: connection pool: failed to dial after 5 attempts: dial tcp: lookup redis-10994.c212.ap-south-1-1.ec2.cloud.redislabs.com on 127.0.0.53:53: server misbehaving
+2025/12/30 04:33:17 ⚠️  Failed to store crash history in PostgreSQL: failed to store crash history: context deadline exceeded
+2025/12/30 12:09:45 👋 Client unregistered: 1767049368-9 (Total: 5)
+2025/12/30 12:09:45 👋 Client unregistered: 1767049368-14 (Total: 4)
+2025/12/30 12:09:45 👋 Client unregistered: 1767049368-13 (Total: 3)
+2025/12/30 12:09:45 👋 Client unregistered: 1767049368-11 (Total: 2)
+2025/12/30 12:09:45 👋 Client unregistered: 1767049368-12 (Total: 1)
+2025/12/30 12:09:45 👋 Client unregistered: 1767049368-10 (Total: 0)
+2025/12/30 12:09:52 ⚠️  Failed to call rugGame on contract: failed to get nonce: Post "https://rpc.sepolia.mantle.xyz": read tcp 192.168.0.107:46618->54.192.151.41:443: read: connection reset by peer
+2025/12/30 12:10:09 🎲 Crash game 20251230-120947.524 finished - Peak: 1.50x, Rugged: true
+2025/12/30 12:10:09 📜 Broadcasted updated crash history (10 games)
+2025/12/30 12:10:09 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 12:10:09 🧹 Cleaned up crash game 1767076787 (0 players)
+2025/12/30 12:10:11 ✅ Stored crash history - Game: 20251230-120947.524, Peak: 1.50x, Rugged: true
+2025/12/30 12:10:14 📊 Estimated gas: 171553668, using: 205864401
+2025/12/30 12:10:14 🔨 Calling rugGame(gameId=1767076787)...
+2025/12/30 12:10:14 ✅ rugGame transaction sent: 0x23bb0e56adfade552ef065ecd07c64394dd6cd2e5b9adb9f659745a544b0c747
+2025/12/30 12:10:20 ✅ rugGame confirmed in block 32766073
+2025/12/30 12:10:20 ✅ rugGame called on contract - TX: 0x23bb0e56adfade552ef065ecd07c64394dd6cd2e5b9adb9f659745a544b0c747
+2025/12/30 12:11:33 🎲 Crash game 20251230-121024.555 finished - Peak: 1.01x, Rugged: true
+2025/12/30 12:11:33 📜 Broadcasted updated crash history (10 games)
+2025/12/30 12:11:33 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 12:11:33 🧹 Cleaned up crash game 1767076824 (0 players)
+2025/12/30 12:11:34 ✅ Stored crash history - Game: 20251230-121024.555, Peak: 1.01x, Rugged: true
+2025/12/30 12:11:34 📊 Estimated gas: 171726752, using: 206072102
+2025/12/30 12:11:34 🔨 Calling rugGame(gameId=1767076824)...
+2025/12/30 12:11:35 ✅ rugGame transaction sent: 0xfb94512befa3b839fe2de53319f054ba2e2af999103d664df4c561d1cd111c3f
+2025/12/30 12:11:39 ✅ rugGame confirmed in block 32766113
+2025/12/30 12:11:39 ✅ rugGame called on contract - TX: 0xfb94512befa3b839fe2de53319f054ba2e2af999103d664df4c561d1cd111c3f
+2025/12/30 12:12:15 🎲 Crash game 20251230-121148.660 finished - Peak: 8.05x, Rugged: true
+2025/12/30 12:12:15 📜 Broadcasted updated crash history (10 games)
+2025/12/30 12:12:15 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 12:12:15 🧹 Cleaned up crash game 1767076908 (0 players)
+2025/12/30 12:12:16 📊 Estimated gas: 171726752, using: 206072102
+2025/12/30 12:12:16 🔨 Calling rugGame(gameId=1767076908)...
+2025/12/30 12:12:16 ✅ Stored crash history - Game: 20251230-121148.660, Peak: 8.05x, Rugged: true
+2025/12/30 12:12:16 ✅ rugGame transaction sent: 0xd7aec8c1b1c7b35574fa5ca92fabffcabacb9eb3cd6f5e7fc50dba334b5d5226
+2025/12/30 12:12:22 ✅ rugGame confirmed in block 32766134
+2025/12/30 12:12:22 ✅ rugGame called on contract - TX: 0xd7aec8c1b1c7b35574fa5ca92fabffcabacb9eb3cd6f5e7fc50dba334b5d5226
+2025/12/30 12:12:59 🎲 Crash game 20251230-121230.203 finished - Peak: 2.20x, Rugged: true
+2025/12/30 12:12:59 📜 Broadcasted updated crash history (10 games)
+2025/12/30 12:12:59 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 12:12:59 🧹 Cleaned up crash game 1767076950 (0 players)
+2025/12/30 12:13:00 ✅ Stored crash history - Game: 20251230-121230.203, Peak: 2.20x, Rugged: true
+2025/12/30 12:13:00 📊 Estimated gas: 171726752, using: 206072102
+2025/12/30 12:13:00 🔨 Calling rugGame(gameId=1767076950)...
+2025/12/30 12:13:01 ✅ rugGame transaction sent: 0xd35815b30ba6cd9e5abe1b6085dfe8caf526d6f3de7afd69efda971d1cf946bc
+2025/12/30 12:13:07 ✅ rugGame confirmed in block 32766156
+2025/12/30 12:13:07 ✅ rugGame called on contract - TX: 0xd35815b30ba6cd9e5abe1b6085dfe8caf526d6f3de7afd69efda971d1cf946bc
+2025/12/30 12:13:17 🎲 Crash game 20251230-121314.750 finished - Peak: 1.00x, Rugged: true
+2025/12/30 12:13:17 📜 Broadcasted updated crash history (10 games)
+2025/12/30 12:13:17 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 12:13:17 🧹 Cleaned up crash game 1767076994 (0 players)
+2025/12/30 12:13:18 ✅ Stored crash history - Game: 20251230-121314.750, Peak: 1.00x, Rugged: true
+2025/12/30 12:13:18 📊 Estimated gas: 171726752, using: 206072102
+2025/12/30 12:13:18 🔨 Calling rugGame(gameId=1767076994)...
+2025/12/30 12:13:19 ✅ rugGame transaction sent: 0xf48e581fc655c161a5290949578e31d58c5a9695fbaa37ebbaf3cf00e37490a0
+2025/12/30 12:13:24 ✅ rugGame confirmed in block 32766165
+2025/12/30 12:13:24 ✅ rugGame called on contract - TX: 0xf48e581fc655c161a5290949578e31d58c5a9695fbaa37ebbaf3cf00e37490a0
+2025/12/30 12:16:25 🎲 Crash game 20251230-121332.756 finished - Peak: 1.79x, Rugged: true
+2025/12/30 12:16:25 📜 Broadcasted updated crash history (10 games)
+2025/12/30 12:16:25 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 12:16:26 🧹 Cleaned up crash game 1767077012 (0 players)
+2025/12/30 12:16:26 ✅ Stored crash history - Game: 20251230-121332.756, Peak: 1.79x, Rugged: true
+2025/12/30 12:16:29 📊 Estimated gas: 171553668, using: 205864401
+2025/12/30 12:16:29 🔨 Calling rugGame(gameId=1767077012)...
+2025/12/30 12:16:29 ✅ rugGame transaction sent: 0xeb57ece06ac5a623a2b83851719aff8344e053eceee985ac3e340d3ec576fe53
+2025/12/30 12:16:32 ✅ rugGame confirmed in block 32766260
+2025/12/30 12:16:32 ✅ rugGame called on contract - TX: 0xeb57ece06ac5a623a2b83851719aff8344e053eceee985ac3e340d3ec576fe53
+2025/12/30 12:17:37 🎲 Crash game 20251230-121640.983 finished - Peak: 5.68x, Rugged: true
+2025/12/30 12:17:37 📜 Broadcasted updated crash history (10 games)
+2025/12/30 12:17:37 ✅ Contract client initialized - Address: 0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5, Owner: 0x78332a9F4b90571cfB6FBA6561f951CF9dF68745
+2025/12/30 12:17:37 🧹 Cleaned up crash game 1767077200 (0 players)
+2025/12/30 12:17:37 📊 Estimated gas: 171553668, using: 205864401
+2025/12/30 12:17:37 🔨 Calling rugGame(gameId=1767077200)...
+2025/12/30 12:17:37 ✅ Stored crash history - Game: 20251230-121640.983, Peak: 5.68x, Rugged: true
+2025/12/30 12:17:37 ✅ rugGame transaction sent: 0xd15efe25ee7fdb064b9d118206b477d6f64bd30e5a22aaada5e69b6c59ff8637
+2025/12/30 12:17:40 ✅ rugGame confirmed in block 32766294
+2025/12/30 12:17:40 ✅ rugGame called on contract - TX: 0xd15efe25ee7fdb064b9d118206b477d6f64bd30e5a22aaada5e69b6c59ff8637

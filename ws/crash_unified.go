@@ -10,6 +10,7 @@ import (
 
 	"goLangServer/contract"
 	"goLangServer/crypto"
+	"goLangServer/db"
 	"goLangServer/game"
 )
 
@@ -74,6 +75,9 @@ func runCrashGameLoop() {
 			ContractGameID: contractGameID,
 		}
 		currentCrashGameMutex.Unlock()
+
+		// Set current game ID for API handlers to access
+		SetCurrentGameID(contractGameID.String())
 
 		// Broadcast game start (send contractGameID as string for client)
 		crashBroadcast <- map[string]interface{}{
@@ -271,29 +275,7 @@ func runCrashGameLoop() {
 		currentCrashGame.Status = "crashed"
 		currentCrashGameMutex.Unlock()
 
-		// Call rugGame on contract if game rugged
-		if rugged {
-			go func() {
-				contractClient, err := contract.NewGameHouseContract()
-				if err != nil {
-					log.Printf("⚠️  Failed to initialize contract client: %v", err)
-					return
-				}
-				defer contractClient.Close()
-
-				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-				defer cancel()
-
-				txHash, err := contractClient.RugGame(ctx, contractGameID)
-				if err != nil {
-					log.Printf("⚠️  Failed to call rugGame on contract: %v", err)
-				} else {
-					log.Printf("✅ rugGame called on contract - TX: %s", txHash)
-				}
-			}()
-		}
-
-		// Broadcast game end
+		// Broadcast game end FIRST to prevent client from asking for more bets/sells
 		crashBroadcast <- map[string]interface{}{
 			"type": "game_end",
 			"data": map[string]interface{}{
@@ -322,7 +304,67 @@ func runCrashGameLoop() {
 		}
 		gameHistoryMutex.Unlock()
 
+		// Store game result in PostgreSQL for provably fair verification
+		go func() {
+			storeCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+
+			historyRecord := &db.CrashHistoryRecord{
+				GameID:             gameID,
+				ServerSeed:         serverSeed,
+				ServerSeedHash:     seedHash,
+				Peak:               peak,
+				CandlestickHistory: groups,
+				Rugged:             rugged,
+				CreatedAt:          time.Now(),
+			}
+
+			if err := db.StoreCrashHistory(storeCtx, historyRecord); err != nil {
+				log.Printf("⚠️  Failed to store crash history in PostgreSQL: %v", err)
+			}
+		}()
+
+		// Call rugGame on contract if game rugged
+		if rugged {
+			go func() {
+				contractClient, err := contract.NewGameHouseContract()
+				if err != nil {
+					log.Printf("⚠️  Failed to initialize contract client: %v", err)
+					return
+				}
+				defer contractClient.Close()
+
+				rugCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+				defer cancel()
+
+				txHash, err := contractClient.RugGame(rugCtx, contractGameID)
+				if err != nil {
+					log.Printf("⚠️  Failed to call rugGame on contract: %v", err)
+				} else {
+					log.Printf("✅ rugGame called on contract - TX: %s", txHash)
+				}
+			}()
+		}
+
+		// Clean up Redis for this game (remove all active bets)
+		gameIDStr := contractGameID.String()
+		go func() {
+			cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			if err := db.CleanupCrashGame(cleanupCtx, gameIDStr); err != nil {
+				log.Printf("⚠️  Failed to cleanup Redis: %v", err)
+			}
+		}()
+
 		log.Printf("🎲 Crash game %s finished - Peak: %.2fx, Rugged: %v", gameID, peak, rugged)
+
+		// Broadcast updated history to all crash subscribers
+		updatedHistory := getCrashGameHistory()
+		crashBroadcast <- map[string]interface{}{
+			"type":    "crash_history",
+			"history": updatedHistory,
+		}
+		log.Printf("📜 Broadcasted updated crash history (%d games)", len(updatedHistory))
 
 		// Clear all active bettors for next game
 		ClearActiveBettors()

@@ -355,7 +355,27 @@ func HandleCandleflipWS(w http.ResponseWriter, r *http.Request) {
 	room.addConnection(conn)
 	defer room.removeConnection(conn)
 
-	log.Printf("✅ Client connected to Candleflip room %s", roomID)
+	log.Printf("✅ Client connected to Candleflip room %s (total connections: %d)", roomID, len(room.Connections))
+
+	// Auto-start game if not already started and room exists in global rooms
+	room.mu.Lock()
+	shouldStart := !room.gameStarted
+	room.mu.Unlock()
+
+	if shouldStart {
+		// Check if room exists in global rooms (created via unified WS)
+		globalRoomsMutex.RLock()
+		roomExists := false
+		if _, exists := globalRooms[roomID]; exists {
+			roomExists = true
+		}
+		globalRoomsMutex.RUnlock()
+
+		if roomExists {
+			// Start game immediately when first client connects
+			go StartCandleflipGame(roomID)
+		}
+	}
 
 	// Keep connection alive and listen for close
 	for {

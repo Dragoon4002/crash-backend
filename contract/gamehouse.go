@@ -24,7 +24,7 @@ const (
 	MantleSepoliaRPC = "https://rpc.sepolia.mantle.xyz"
 
 	// Contract address (GameHouseV2)
-	ContractAddress = "0x2A9caFEDFc91d55E00B6d1514E39BeB940832b5D"
+	ContractAddress = "0x43a01A18a2C947179595A7b17bDCc3d88ecF04F5"
 
 	// Chain ID for Mantle Sepolia
 	ChainID = 5003
@@ -32,12 +32,12 @@ const (
 
 // GameHouseContract wraps the contract interaction
 type GameHouseContract struct {
-	client      *ethclient.Client
-	contract    *bind.BoundContract
-	abi         abi.ABI
-	address     common.Address
-	privateKey  *ecdsa.PrivateKey
-	fromAddress common.Address
+	Client      *ethclient.Client
+	Contract    *bind.BoundContract
+	ABI         abi.ABI
+	Address     common.Address
+	PrivateKey  *ecdsa.PrivateKey
+	FromAddress common.Address
 }
 
 // ABIFile structure
@@ -99,12 +99,12 @@ func NewGameHouseContract() (*GameHouseContract, error) {
 	log.Printf("✅ Contract client initialized - Address: %s, Owner: %s", ContractAddress, fromAddress.Hex())
 
 	return &GameHouseContract{
-		client:      client,
-		contract:    contract,
-		abi:         contractABI,
-		address:     contractAddress,
-		privateKey:  privateKey,
-		fromAddress: fromAddress,
+		Client:      client,
+		Contract:    contract,
+		ABI:         contractABI,
+		Address:     contractAddress,
+		PrivateKey:  privateKey,
+		FromAddress: fromAddress,
 	}, nil
 }
 
@@ -112,34 +112,34 @@ func NewGameHouseContract() (*GameHouseContract, error) {
 func (c *GameHouseContract) RugGame(ctx context.Context, gameID *big.Int) (string, error) {
 	// Create transactor
 	chainIDBig := big.NewInt(ChainID)
-	auth, err := bind.NewKeyedTransactorWithChainID(c.privateKey, chainIDBig)
+	auth, err := bind.NewKeyedTransactorWithChainID(c.PrivateKey, chainIDBig)
 	if err != nil {
 		return "", fmt.Errorf("failed to create transactor: %v", err)
 	}
 
 	// Get nonce
-	nonce, err := c.client.PendingNonceAt(ctx, c.fromAddress)
+	nonce, err := c.Client.PendingNonceAt(ctx, c.FromAddress)
 	if err != nil {
 		return "", fmt.Errorf("failed to get nonce: %v", err)
 	}
 	auth.Nonce = big.NewInt(int64(nonce))
 
 	// Get gas price
-	gasPrice, err := c.client.SuggestGasPrice(ctx)
+	gasPrice, err := c.Client.SuggestGasPrice(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to get gas price: %v", err)
 	}
 	auth.GasPrice = gasPrice
 
 	// Estimate gas limit
-	input, err := c.abi.Pack("rugGame", gameID)
+	input, err := c.ABI.Pack("rugGame", gameID)
 	if err != nil {
 		return "", fmt.Errorf("failed to pack input: %v", err)
 	}
 
-	gasLimit, err := c.client.EstimateGas(ctx, ethereum.CallMsg{
-		From: c.fromAddress,
-		To:   &c.address,
+	gasLimit, err := c.Client.EstimateGas(ctx, ethereum.CallMsg{
+		From: c.FromAddress,
+		To:   &c.Address,
 		Data: input,
 	})
 	if err != nil {
@@ -154,7 +154,7 @@ func (c *GameHouseContract) RugGame(ctx context.Context, gameID *big.Int) (strin
 	log.Printf("🔨 Calling rugGame(gameId=%s)...", gameID.String())
 
 	// Call rugGame
-	tx, err := c.contract.Transact(auth, "rugGame", gameID)
+	tx, err := c.Contract.Transact(auth, "rugGame", gameID)
 	if err != nil {
 		return "", fmt.Errorf("failed to call rugGame: %v", err)
 	}
@@ -162,7 +162,7 @@ func (c *GameHouseContract) RugGame(ctx context.Context, gameID *big.Int) (strin
 	log.Printf("✅ rugGame transaction sent: %s", tx.Hash().Hex())
 
 	// Wait for confirmation
-	receipt, err := bind.WaitMined(ctx, c.client, tx)
+	receipt, err := bind.WaitMined(ctx, c.Client, tx)
 	if err != nil {
 		return "", fmt.Errorf("failed to wait for transaction: %v", err)
 	}
@@ -180,34 +180,34 @@ func (c *GameHouseContract) RugGame(ctx context.Context, gameID *big.Int) (strin
 func (c *GameHouseContract) ResolveCandleFlip(ctx context.Context, gameID *big.Int, roomsWon *big.Int) (string, error) {
 	// Create transactor
 	chainIDBig := big.NewInt(ChainID)
-	auth, err := bind.NewKeyedTransactorWithChainID(c.privateKey, chainIDBig)
+	auth, err := bind.NewKeyedTransactorWithChainID(c.PrivateKey, chainIDBig)
 	if err != nil {
 		return "", fmt.Errorf("failed to create transactor: %v", err)
 	}
 
 	// Get nonce
-	nonce, err := c.client.PendingNonceAt(ctx, c.fromAddress)
+	nonce, err := c.Client.PendingNonceAt(ctx, c.FromAddress)
 	if err != nil {
 		return "", fmt.Errorf("failed to get nonce: %v", err)
 	}
 	auth.Nonce = big.NewInt(int64(nonce))
 
 	// Get gas price
-	gasPrice, err := c.client.SuggestGasPrice(ctx)
+	gasPrice, err := c.Client.SuggestGasPrice(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to get gas price: %v", err)
 	}
 	auth.GasPrice = gasPrice
 
 	// Estimate gas limit
-	input, err := c.abi.Pack("resolveCandleFlip", gameID, roomsWon)
+	input, err := c.ABI.Pack("resolveCandleFlip", gameID, roomsWon)
 	if err != nil {
 		return "", fmt.Errorf("failed to pack input: %v", err)
 	}
 
-	gasLimit, err := c.client.EstimateGas(ctx, ethereum.CallMsg{
-		From: c.fromAddress,
-		To:   &c.address,
+	gasLimit, err := c.Client.EstimateGas(ctx, ethereum.CallMsg{
+		From: c.FromAddress,
+		To:   &c.Address,
 		Data: input,
 	})
 	if err != nil {
@@ -222,7 +222,7 @@ func (c *GameHouseContract) ResolveCandleFlip(ctx context.Context, gameID *big.I
 	log.Printf("🎲 Calling resolveCandleFlip(gameId=%s, roomsWon=%s)...", gameID.String(), roomsWon.String())
 
 	// Call resolveCandleFlip
-	tx, err := c.contract.Transact(auth, "resolveCandleFlip", gameID, roomsWon)
+	tx, err := c.Contract.Transact(auth, "resolveCandleFlip", gameID, roomsWon)
 	if err != nil {
 		return "", fmt.Errorf("failed to call resolveCandleFlip: %v", err)
 	}
@@ -230,7 +230,7 @@ func (c *GameHouseContract) ResolveCandleFlip(ctx context.Context, gameID *big.I
 	log.Printf("✅ resolveCandleFlip transaction sent: %s", tx.Hash().Hex())
 
 	// Wait for confirmation
-	receipt, err := bind.WaitMined(ctx, c.client, tx)
+	receipt, err := bind.WaitMined(ctx, c.Client, tx)
 	if err != nil {
 		return "", fmt.Errorf("failed to wait for transaction: %v", err)
 	}
@@ -248,7 +248,7 @@ func (c *GameHouseContract) ResolveCandleFlip(ctx context.Context, gameID *big.I
 // Only callable by contract owner (relayer)
 func (c *GameHouseContract) CashOutFor(auth *bind.TransactOpts, player common.Address, gameID *big.Int, currentMultiplier *big.Int) (*types.Transaction, error) {
 	// Call cashOutFor function on contract
-	tx, err := c.contract.Transact(auth, "cashOutFor", player, gameID, currentMultiplier)
+	tx, err := c.Contract.Transact(auth, "cashOutFor", player, gameID, currentMultiplier)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call cashOutFor: %w", err)
 	}
@@ -261,7 +261,7 @@ func (c *GameHouseContract) CashOutFor(auth *bind.TransactOpts, player common.Ad
 // Only callable by contract owner (relayer)
 func (c *GameHouseContract) BuyInFor(auth *bind.TransactOpts, player common.Address, gameID *big.Int, entryMultiplier *big.Int) (*types.Transaction, error) {
 	// Call buyInFor function on contract
-	tx, err := c.contract.Transact(auth, "buyInFor", player, gameID, entryMultiplier)
+	tx, err := c.Contract.Transact(auth, "buyInFor", player, gameID, entryMultiplier)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call buyInFor: %w", err)
 	}
@@ -272,5 +272,5 @@ func (c *GameHouseContract) BuyInFor(auth *bind.TransactOpts, player common.Addr
 
 // Close closes the client connection
 func (c *GameHouseContract) Close() {
-	c.client.Close()
+	c.Client.Close()
 }
