@@ -93,8 +93,6 @@ func HandleCrashRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get current game ID from the crash game state
-	// TODO: This should be pulled from the current running game
-	// For now, we'll use a placeholder
 	gameID := getCurrentCrashGameID()
 	if gameID == "" {
 		sendError(w, http.StatusServiceUnavailable, "No active crash game")
@@ -222,6 +220,8 @@ func HandleCrashCashout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	playerAddress := common.HexToAddress(req.Address)
+
 	// Create transactor (server pays gas)
 	chainIDBig := big.NewInt(5003) // Mantle Sepolia
 	auth, err := bind.NewKeyedTransactorWithChainID(contractClient.PrivateKey, chainIDBig)
@@ -250,7 +250,6 @@ func HandleCrashCashout(w http.ResponseWriter, r *http.Request) {
 	auth.GasLimit = uint64(config.RelayerGasLimit)
 
 	// Execute cashOutFor on contract (server pays gas)
-	playerAddress := common.HexToAddress(req.Address)
 	tx, err := contractClient.CashOutFor(auth, playerAddress, gameIDBig, currentMultiplierWei)
 	if err != nil {
 		log.Printf("❌ Failed to execute cashout: %v", err)
