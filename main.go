@@ -54,14 +54,6 @@ func main() {
 	http.HandleFunc("/ws", corsMiddleware(ws.HandleUnifiedWS))
 	http.HandleFunc("/candleflip", corsMiddleware(ws.HandleCandleflipWS))
 
-	// Crash game API endpoints
-	http.HandleFunc("/api/crash/register", corsMiddleware(api.HandleCrashRegister))
-	http.HandleFunc("/api/crash/cashout", corsMiddleware(api.HandleCrashCashout))
-
-	// CandleFlip API endpoints
-	http.HandleFunc("/api/candle/register", corsMiddleware(api.HandleCandleFlipRegister))
-	http.HandleFunc("/api/candle/preview-odds", corsMiddleware(api.HandleCandleFlipPreviewOdds))
-
 	// Verification and health endpoints
 	http.HandleFunc("/api/verify/", corsMiddleware(api.HandleVerifyGame))
 	http.HandleFunc("/api/health", corsMiddleware(api.HandleHealthCheck))

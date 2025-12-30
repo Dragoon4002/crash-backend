@@ -1,3 +1,4 @@
+//api/crash.go
 package api
 
 import (
@@ -249,13 +250,13 @@ func HandleCrashCashout(w http.ResponseWriter, r *http.Request) {
 	auth.GasPrice = gasPrice
 	auth.GasLimit = uint64(config.RelayerGasLimit)
 
-	// Execute cashOutFor on contract (server pays gas)
-	tx, err := contractClient.CashOutFor(auth, playerAddress, gameIDBig, currentMultiplierWei)
-	if err != nil {
-		log.Printf("❌ Failed to execute cashout: %v", err)
-		sendError(w, http.StatusInternalServerError, fmt.Sprintf("Cashout failed: %v", err))
-		return
-	}
+	// // Execute cashOutFor on contract (server pays gas)
+	// tx, err := contractClient.CashOutFor(auth, playerAddress, gameIDBig, currentMultiplierWei)
+	// if err != nil {
+	// 	log.Printf("❌ Failed to execute cashout: %v", err)
+	// 	sendError(w, http.StatusInternalServerError, fmt.Sprintf("Cashout failed: %v", err))
+	// 	return
+	// }
 
 	txHash := tx.Hash().Hex()
 
@@ -285,15 +286,6 @@ func HandleCrashCashout(w http.ResponseWriter, r *http.Request) {
    HELPER FUNCTIONS
 ========================= */
 
-// sendError sends an error response
-func sendError(w http.ResponseWriter, statusCode int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(ErrorResponse{
-		Success: false,
-		Error:   message,
-	})
-}
 
 // getCurrentCrashGameID returns the current crash game ID from the running game
 func getCurrentCrashGameID() string {

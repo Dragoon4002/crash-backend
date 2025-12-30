@@ -1,241 +1,249 @@
+// api/candleflip.go
 package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
-	"math/big"
 	"net/http"
-	"time"
+	"strings"
 
-	"goLangServer/config"
-	"goLangServer/db"
+	"goLangServer/ws"
 )
 
 /* =========================
-   REQUEST/RESPONSE TYPES
+   RESPONSE TYPES
 ========================= */
 
-// CandleFlipRegisterRequest represents the candleflip registration request
-type CandleFlipRegisterRequest struct {
-	Address    string `json:"address"`
-	BetPerRoom string `json:"betPerRoom"` // Wei as string
-	Rooms      uint64 `json:"rooms"`
-	TxHash     string `json:"txHash"`
+type RoomResponse struct {
+	RoomNumber int     `json:"roomNumber"`
+	Status     string  `json:"status"`
+	FinalPrice float64 `json:"finalPrice,omitempty"`
+	Winner     string  `json:"winner,omitempty"`
+	PlayerWon  bool    `json:"playerWon"`
 }
 
-// CandleFlipRegisterResponse represents the candleflip registration response
-type CandleFlipRegisterResponse struct {
-	Success  bool    `json:"success"`
-	Message  string  `json:"message"`
-	GameID   string  `json:"gameId,omitempty"`
-	Odds     float64 `json:"odds,omitempty"`
-	Exposure string  `json:"exposure,omitempty"` // Wei as string
+type BatchResponse struct {
+	BatchID        string          `json:"batchId"`
+	PlayerAddress  string          `json:"playerAddress"`
+	AmountPerRoom  string          `json:"amountPerRoom"`
+	TotalRooms     int             `json:"totalRooms"`
+	PlayerSide     string          `json:"playerSide"`
+	AISide         string          `json:"aiSide"`
+	Status         string          `json:"status"`
+	WonRooms       int             `json:"wonRooms"`
+	PayoutAmount   string          `json:"payoutAmount,omitempty"`
+	PayoutTxHash   string          `json:"payoutTxHash,omitempty"`
+	PayoutError    string          `json:"payoutError,omitempty"`
+	ServerSeed     string          `json:"serverSeed,omitempty"`
+	ServerSeedHash string          `json:"serverSeedHash"`
+	Rooms          []RoomResponse  `json:"rooms"`
 }
 
-// CandleFlipPreviewOddsRequest represents the preview odds request
-type CandleFlipPreviewOddsRequest struct {
-	BetPerRoom string `json:"betPerRoom"` // Wei as string
-	Rooms      uint64 `json:"rooms"`
+type AllBatchesResponse struct {
+	Success bool            `json:"success"`
+	Batches []BatchResponse `json:"batches"`
+	Count   int             `json:"count"`
 }
 
-// CandleFlipPreviewOddsResponse represents the preview odds response
-type CandleFlipPreviewOddsResponse struct {
-	Success  bool    `json:"success"`
-	Odds     float64 `json:"odds"`
-	Exposure string  `json:"exposure"` // Wei as string
-	Message  string  `json:"message,omitempty"`
+type SingleBatchResponse struct {
+	Success bool          `json:"success"`
+	Batch   BatchResponse `json:"batch,omitempty"`
+	Message string        `json:"message,omitempty"`
 }
 
 /* =========================
-   CANDLEFLIP ENDPOINTS
+   HTTP ENDPOINTS
 ========================= */
 
-// HandleCandleFlipRegister handles candleflip game registration
-// POST /api/candle/register
-func HandleCandleFlipRegister(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+// HandleGetAllBatches returns all active batches
+// GET /api/candleflip/batches
+func HandleGetAllBatches(w http.ResponseWriter, r *http.Request) {
+	batches := ws.GetAllBatches()
 
-	// Parse request
-	var req CandleFlipRegisterRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		sendError(w, http.StatusBadRequest, "Invalid request body")
-		return
+	response := AllBatchesResponse{
+		Success: true,
+		Batches: make([]BatchResponse, 0, len(batches)),
+		Count:   len(batches),
 	}
 
-	// Validate request
-	if req.Address == "" {
-		sendError(w, http.StatusBadRequest, "Address is required")
-		return
-	}
-	if req.BetPerRoom == "" {
-		sendError(w, http.StatusBadRequest, "Bet per room is required")
-		return
-	}
-	if req.Rooms < config.MinRooms || req.Rooms > config.MaxRooms {
-		sendError(w, http.StatusBadRequest, fmt.Sprintf("Rooms must be between %d and %d", config.MinRooms, config.MaxRooms))
-		return
-	}
-	if req.TxHash == "" {
-		sendError(w, http.StatusBadRequest, "Transaction hash is required")
-		return
-	}
+	for _, batch := range batches {
+		batch.RLock()
+		
+		batchResp := BatchResponse{
+			BatchID:        batch.BatchID,
+			PlayerAddress:  batch.PlayerAddress.Hex(),
+			AmountPerRoom:  batch.AmountPerRoom.String(),
+			TotalRooms:     batch.TotalRooms,
+			PlayerSide:     batch.PlayerSide,
+			AISide:         getOppositeSide(batch.PlayerSide),
+			Status:         batch.Status,
+			WonRooms:       batch.WonRooms,
+			ServerSeedHash: batch.ServerSeedHash,
+			Rooms:          make([]RoomResponse, len(batch.Rooms)),
+		}
 
-	// Parse bet per room
-	betPerRoomBig, ok := new(big.Int).SetString(req.BetPerRoom, 10)
-	if !ok {
-		sendError(w, http.StatusBadRequest, "Invalid bet per room")
-		return
-	}
+		// Include server seed only if batch is completed or paid
+		if batch.Status == "completed" || batch.Status == "paid" {
+			batchResp.ServerSeed = batch.ServerSeed
+		}
 
-	// Calculate exposure: betPerRoom * rooms * 2
-	roomsBig := big.NewInt(int64(req.Rooms))
-	twoBig := big.NewInt(2)
-	exposure := new(big.Int).Mul(betPerRoomBig, roomsBig)
-	exposure = exposure.Mul(exposure, twoBig)
+		// Include payout info
+		if batch.PayoutAmount != nil {
+			batchResp.PayoutAmount = batch.PayoutAmount.String()
+		}
+		if batch.PayoutTxHash != "" {
+			batchResp.PayoutTxHash = batch.PayoutTxHash
+		}
+		if batch.PayoutError != "" {
+			batchResp.PayoutError = batch.PayoutError
+		}
 
-	// TODO: Verify the transaction on-chain
-	// For now, we trust the client provided txHash
+		// Copy room data
+		for i, room := range batch.Rooms {
+			batchResp.Rooms[i] = RoomResponse{
+				RoomNumber: room.RoomNumber,
+				Status:     room.Status,
+				FinalPrice: room.FinalPrice,
+				Winner:     room.Winner,
+				PlayerWon:  room.PlayerWon,
+			}
+		}
 
-	// Calculate odds (same logic as contract)
-	odds := calculateOdds(exposure)
+		batch.RUnlock()
 
-	// Generate unique game ID (timestamp + address suffix)
-	gameID := fmt.Sprintf("%d-%s", time.Now().UnixNano(), req.Address[len(req.Address)-6:])
-
-	// Store game in Redis
-	game := &db.CandleFlipGameData{
-		PlayerAddress: req.Address,
-		GameID:        gameID,
-		BetPerRoom:    req.BetPerRoom,
-		Rooms:         req.Rooms,
-		Odds:          odds,
-		Exposure:      exposure.String(),
-		Timestamp:     time.Now(),
-		TxHash:        req.TxHash,
-	}
-
-	if err := db.StoreCandleFlipGame(ctx, gameID, req.Address, game); err != nil {
-		log.Printf("❌ Failed to store candleflip game: %v", err)
-		sendError(w, http.StatusInternalServerError, "Failed to register game")
-		return
-	}
-
-	// Send success response
-	response := CandleFlipRegisterResponse{
-		Success:  true,
-		Message:  "CandleFlip game registered successfully",
-		GameID:   gameID,
-		Odds:     odds,
-		Exposure: exposure.String(),
+		response.Batches = append(response.Batches, batchResp)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 
-	log.Printf("✅ CandleFlip registered - Game: %s, Player: %s, Rooms: %d, Odds: %.2fx",
-		gameID, req.Address, req.Rooms, odds)
-
-	// TODO: Start game simulation for this player
-	// This should trigger the server to run the candleflip rooms and broadcast results via WebSocket
+	log.Printf("📋 Retrieved %d CandleFlip batches", len(batches))
 }
 
-// HandleCandleFlipPreviewOdds handles preview odds calculation
-// POST /api/candle/preview-odds
-func HandleCandleFlipPreviewOdds(w http.ResponseWriter, r *http.Request) {
-	// Parse request
-	var req CandleFlipPreviewOddsRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		sendError(w, http.StatusBadRequest, "Invalid request body")
+// HandleGetBatchByID returns a specific batch by ID
+// GET /api/candleflip/batch/:batchId
+func HandleGetBatchByID(w http.ResponseWriter, r *http.Request) {
+	// Extract batch ID from URL path
+	// Expected format: /api/candleflip/batch/{batchId}
+	path := r.URL.Path
+	parts := strings.Split(path, "/")
+	if len(parts) < 5 {
+		sendError(w, http.StatusBadRequest, "Batch ID is required")
+		return
+	}
+	batchID := parts[4]
+
+	batch := ws.GetBatch(batchID)
+	if batch == nil {
+		sendError(w, http.StatusNotFound, "Batch not found")
 		return
 	}
 
-	// Validate request
-	if req.BetPerRoom == "" {
-		sendError(w, http.StatusBadRequest, "Bet per room is required")
-		return
+	batch.RLock()
+	defer batch.RUnlock()
+
+	batchResp := BatchResponse{
+		BatchID:        batch.BatchID,
+		PlayerAddress:  batch.PlayerAddress.Hex(),
+		AmountPerRoom:  batch.AmountPerRoom.String(),
+		TotalRooms:     batch.TotalRooms,
+		PlayerSide:     batch.PlayerSide,
+		AISide:         getOppositeSide(batch.PlayerSide),
+		Status:         batch.Status,
+		WonRooms:       batch.WonRooms,
+		ServerSeedHash: batch.ServerSeedHash,
+		Rooms:          make([]RoomResponse, len(batch.Rooms)),
 	}
-	if req.Rooms < config.MinRooms || req.Rooms > config.MaxRooms {
-		sendError(w, http.StatusBadRequest, fmt.Sprintf("Rooms must be between %d and %d", config.MinRooms, config.MaxRooms))
-		return
+
+	// Include server seed only if batch is completed or paid
+	if batch.Status == "completed" || batch.Status == "paid" {
+		batchResp.ServerSeed = batch.ServerSeed
 	}
 
-	// Parse bet per room
-	betPerRoomBig, ok := new(big.Int).SetString(req.BetPerRoom, 10)
-	if !ok {
-		sendError(w, http.StatusBadRequest, "Invalid bet per room")
-		return
+	// Include payout info
+	if batch.PayoutAmount != nil {
+		batchResp.PayoutAmount = batch.PayoutAmount.String()
+	}
+	if batch.PayoutTxHash != "" {
+		batchResp.PayoutTxHash = batch.PayoutTxHash
+	}
+	if batch.PayoutError != "" {
+		batchResp.PayoutError = batch.PayoutError
 	}
 
-	// Calculate exposure: betPerRoom * rooms * 2
-	roomsBig := big.NewInt(int64(req.Rooms))
-	twoBig := big.NewInt(2)
-	exposure := new(big.Int).Mul(betPerRoomBig, roomsBig)
-	exposure = exposure.Mul(exposure, twoBig)
+	// Copy room data
+	for i, room := range batch.Rooms {
+		batchResp.Rooms[i] = RoomResponse{
+			RoomNumber: room.RoomNumber,
+			Status:     room.Status,
+			FinalPrice: room.FinalPrice,
+			Winner:     room.Winner,
+			PlayerWon:  room.PlayerWon,
+		}
+	}
 
-	// Calculate odds
-	odds := calculateOdds(exposure)
-
-	// Send response
-	response := CandleFlipPreviewOddsResponse{
-		Success:  true,
-		Odds:     odds,
-		Exposure: exposure.String(),
+	response := SingleBatchResponse{
+		Success: true,
+		Batch:   batchResp,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 
-	log.Printf("📊 Odds preview - BetPerRoom: %s, Rooms: %d, Odds: %.2fx", req.BetPerRoom, req.Rooms, odds)
+	log.Printf("📋 Retrieved batch: %s", batchID)
+}
+
+// HandleVerifyBatch verifies a batch using server seed
+// GET /api/verify/candleflip/:batchId
+func HandleVerifyBatch(w http.ResponseWriter, r *http.Request) {
+	// Extract batch ID from URL path
+	// Expected format: /api/verify/candleflip/{batchId}
+	path := r.URL.Path
+	parts := strings.Split(path, "/")
+	if len(parts) < 5 {
+		sendError(w, http.StatusBadRequest, "Batch ID is required")
+		return
+	}
+	batchID := parts[4]
+
+	batch := ws.GetBatch(batchID)
+	if batch == nil {
+		sendError(w, http.StatusNotFound, "Batch not found")
+		return
+	}
+
+	batch.RLock()
+	defer batch.RUnlock()
+
+	// Only return server seed if game is completed
+	if batch.Status != "completed" && batch.Status != "paid" {
+		sendError(w, http.StatusBadRequest, "Batch is not yet completed")
+		return
+	}
+
+	response := map[string]interface{}{
+		"success":        true,
+		"batchId":        batch.BatchID,
+		"serverSeed":     batch.ServerSeed,
+		"serverSeedHash": batch.ServerSeedHash,
+		"totalRooms":     batch.TotalRooms,
+		"wonRooms":       batch.WonRooms,
+		"message":        "Verify by hashing the serverSeed and comparing with serverSeedHash. Each room can be reproduced using the seed format: serverSeed-room-{roomNumber}",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+
+	log.Printf("🔍 Batch verification - Batch: %s", batchID)
 }
 
 /* =========================
-   ODDS CALCULATION
+   HELPER FUNCTIONS
 ========================= */
 
-// calculateOdds calculates dynamic odds based on house liquidity
-// This mirrors the contract logic in GameHouseV2.sol
-func calculateOdds(singleGameExposure *big.Int) float64 {
-	// TODO: Get actual house balance and active exposure from contract
-	// For now, using placeholder values
-	houseBalance := big.NewInt(0).Mul(big.NewInt(100), big.NewInt(1e18))   // 100 MNT
-	activeExposure := big.NewInt(0).Mul(big.NewInt(10), big.NewInt(1e18)) // 10 MNT
-
-	// Calculate required reserve: exposure * RESERVE_GAMES
-	reserveGamesBig := big.NewInt(int64(config.ReserveGames))
-	requiredReserve := new(big.Int).Mul(singleGameExposure, reserveGamesBig)
-
-	// If house balance <= active exposure, return min odds
-	if houseBalance.Cmp(activeExposure) <= 0 {
-		return config.GetMinOddsFloat()
+func getOppositeSide(side string) string {
+	if side == "bull" {
+		return "bear"
 	}
-
-	// Calculate available balance
-	availableBalance := new(big.Int).Sub(houseBalance, activeExposure)
-
-	// Calculate risk factor
-	var riskFactor *big.Int
-	if availableBalance.Cmp(requiredReserve) >= 0 {
-		// Full odds
-		riskFactor = big.NewInt(1e18)
-	} else {
-		// Scaled odds: (availableBalance * 1e18) / requiredReserve
-		riskFactor = new(big.Int).Mul(availableBalance, big.NewInt(1e18))
-		riskFactor = riskFactor.Div(riskFactor, requiredReserve)
-	}
-
-	// Calculate odds: (BASE_ODDS * riskFactor) / 1e18
-	odds := new(big.Int).Mul(config.BaseOdds, riskFactor)
-	odds = odds.Div(odds, big.NewInt(1e18))
-
-	// Convert to float
-	oddsFloat := config.WeiToMultiplier(odds)
-
-	// Enforce minimum odds
-	minOdds := config.GetMinOddsFloat()
-	if oddsFloat < minOdds {
-		return minOdds
-	}
-
-	return oddsFloat
+	return "bull"
 }

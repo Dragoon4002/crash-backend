@@ -1,3 +1,4 @@
+//game/candleflip.go
 package game
 
 import (
