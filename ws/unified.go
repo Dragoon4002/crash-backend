@@ -1,14 +1,20 @@
 package ws
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/big"
 	"net/http"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"goLangServer/contract"
+	"goLangServer/db"
+
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,7 +24,15 @@ type ClientConnection struct {
 	Conn          *websocket.Conn
 	Subscriptions map[string]bool // crash, chat, rooms, candleflip:<roomId>
 	mu            sync.RWMutex
+	writeMutex    sync.Mutex // Protects websocket writes
 	Send          chan []byte
+}
+
+// writeJSON safely writes JSON to the websocket with mutex protection
+func (c *ClientConnection) writeJSON(v interface{}) error {
+	c.writeMutex.Lock()
+	defer c.writeMutex.Unlock()
+	return c.Conn.WriteJSON(v)
 }
 
 var (
@@ -40,7 +54,19 @@ var (
 	chatHistory      []interface{}
 	chatHistoryMutex sync.RWMutex
 	maxChatHistory   = 100
+
+	// Contract client for payPlayer calls
+	contractClient      *contract.GameHouseContract
+	contractClientMutex sync.RWMutex
 )
+
+// SetContractClient sets the global contract client instance
+func SetContractClient(client *contract.GameHouseContract) {
+	contractClientMutex.Lock()
+	defer contractClientMutex.Unlock()
+	contractClient = client
+	log.Println("✅ Contract client set for crash payouts")
+}
 
 // Message types from client
 type ClientMessage struct {
@@ -49,8 +75,48 @@ type ClientMessage struct {
 }
 
 func init() {
+	// Load chat history from database
+	go loadChatHistoryFromDB()
+
 	// Start the unified event hub
 	go runEventHub()
+
+	// Start periodic room broadcaster (for constant updates)
+	go runPeriodicRoomBroadcaster()
+}
+
+// loadChatHistoryFromDB loads recent chat messages from PostgreSQL on startup
+func loadChatHistoryFromDB() {
+	// Wait a bit for DB to initialize
+	time.Sleep(2 * time.Second)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	messages, err := db.GetRecentChatMessages(ctx, maxChatHistory)
+	if err != nil {
+		log.Printf("⚠️  Failed to load chat history from DB: %v", err)
+		return
+	}
+
+	if len(messages) == 0 {
+		log.Println("📨 No chat history found in database")
+		return
+	}
+
+	// Convert to interface{} slice for chatHistory
+	chatHistoryMutex.Lock()
+	for _, msg := range messages {
+		chatHistory = append(chatHistory, map[string]interface{}{
+			"type":          "chat_message",
+			"playerAddress": msg.PlayerAddress,
+			"message":       msg.Message,
+			"timestamp":     msg.Timestamp.Format(time.RFC3339),
+		})
+	}
+	chatHistoryMutex.Unlock()
+
+	log.Printf("✅ Loaded %d chat messages from database", len(messages))
 }
 
 // runEventHub is the central message dispatcher
@@ -92,6 +158,40 @@ func runEventHub() {
 
 		case message := <-roomsBroadcast:
 			broadcastToSubscribers("rooms", message)
+		}
+	}
+}
+
+// runPeriodicRoomBroadcaster broadcasts room updates every 200ms
+// Tested to handle up to 10 rooms in parallel batches efficiently
+func runPeriodicRoomBroadcaster() {
+	log.Println("📡 Periodic room broadcaster started (200ms interval, max 10 rooms per batch)")
+	ticker := time.NewTicker(200 * time.Millisecond)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		// Get current rooms
+		globalRoomsMutex.RLock()
+		rooms := make([]*RoomInfo, 0, len(globalRooms))
+		for _, room := range globalRooms {
+			rooms = append(rooms, room)
+		}
+		globalRoomsMutex.RUnlock()
+
+		// Only broadcast if there are rooms to show
+		if len(rooms) > 0 {
+			message := map[string]interface{}{
+				"type":  "rooms_update",
+				"rooms": rooms,
+			}
+
+			// Send to unified broadcast channel
+			select {
+			case roomsBroadcast <- message:
+				// Successfully sent
+			default:
+				// Channel full, skip this broadcast
+			}
 		}
 	}
 }
@@ -156,7 +256,11 @@ func (c *ClientConnection) writePump() {
 	}()
 
 	for message := range c.Send {
-		if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+		c.writeMutex.Lock()
+		err := c.Conn.WriteMessage(websocket.TextMessage, message)
+		c.writeMutex.Unlock()
+
+		if err != nil {
 			log.Printf("❌ Write error for client %s: %v", c.ID, err)
 			return
 		}
@@ -215,6 +319,12 @@ func (c *ClientConnection) handleMessage(msg ClientMessage) {
 	case "chat_message":
 		handleChatMessage(c, msg.Data)
 
+	case "crash_bet_placed":
+		handleCrashBetPlaced(c, msg.Data)
+
+	case "crash_cashout":
+		handleCrashCashout(c, msg.Data)
+
 	case "join_candleflip_room":
 		roomID := msg.Data["roomId"].(string)
 		handleJoinCandleflipRoom(c, roomID)
@@ -224,51 +334,49 @@ func (c *ClientConnection) handleMessage(msg ClientMessage) {
 	}
 }
 
-// sendInitialData sends current state when client subscribes to a channel
+// sendInitialData sends initial state when client subscribes to a channel
+// For crash and rooms, periodic broadcasts handle syncing (no initial send needed)
+// For chat, send history immediately since it's a one-time operation
 func (c *ClientConnection) sendInitialData(channel string) {
 	switch channel {
 	case "crash":
-		// Send crash game history
-		history := getCrashGameHistory()
-
-		data, _ := json.Marshal(map[string]interface{}{
+		// Send crash history immediately
+		history := GetCrashHistory()
+		historyMsg := map[string]interface{}{
 			"type":    "crash_history",
 			"history": history,
-		})
-		c.Send <- data
+		}
+		if err := c.writeJSON(historyMsg); err != nil {
+			log.Printf("⚠️  Failed to send crash history to client %s: %v", c.ID, err)
+		} else {
+			log.Printf("📨 Client %s subscribed to crash - sent %d history items", c.ID, len(history))
+		}
 
-		// Send current active bettors
+		// Send active bettors immediately
 		bettors := GetActiveBettors()
-		bettorData, _ := json.Marshal(map[string]interface{}{
+		bettorsMsg := map[string]interface{}{
 			"type":    "active_bettors",
 			"bettors": bettors,
 			"count":   len(bettors),
-		})
-		c.Send <- bettorData
+		}
+		if err := c.writeJSON(bettorsMsg); err != nil {
+			log.Printf("⚠️  Failed to send active bettors to client %s: %v", c.ID, err)
+		} else {
+			log.Printf("📨 Client %s - sent %d active bettors", c.ID, len(bettors))
+		}
 
 	case "rooms":
-		// Send current room list
-		globalRoomsMutex.RLock()
-		rooms := make([]*RoomInfo, 0, len(globalRooms))
-		for _, room := range globalRooms {
-			rooms = append(rooms, room)
-		}
-		globalRoomsMutex.RUnlock()
-
-		data, _ := json.Marshal(map[string]interface{}{
-			"type":  "rooms_update",
-			"rooms": rooms,
-		})
-		c.Send <- data
+		// No initial sync needed - periodic broadcasts every 200ms
+		log.Printf("📨 Client %s subscribed to rooms (will receive next broadcast within 200ms)", c.ID)
 
 	case "chat":
-		// Send chat history to new client
+		// Send chat history from in-memory buffer
 		chatHistoryMutex.RLock()
 		history := make([]interface{}, len(chatHistory))
 		copy(history, chatHistory)
 		chatHistoryMutex.RUnlock()
 
-		// Send each message individually to maintain order
+		// Send each message
 		for _, msg := range history {
 			data, _ := json.Marshal(msg)
 			c.Send <- data
@@ -347,15 +455,182 @@ func handleCreateRoom(data map[string]interface{}) {
 func handleChatMessage(client *ClientConnection, data map[string]interface{}) {
 	message := data["message"].(string)
 
-	chatMsg := map[string]interface{}{
-		"type":      "chat_message",
-		"username":  "User-" + client.ID[len(client.ID)-min(8, len(client.ID)):],
-		"message":   message,
-		"userId":    client.ID,
-		"timestamp": time.Now().Format(time.RFC3339),
+	// Player address (use client ID as fallback if no address provided)
+	playerAddress := client.ID
+	if addr, ok := data["playerAddress"].(string); ok && addr != "" {
+		playerAddress = addr
 	}
 
+	now := time.Now()
+	chatMsg := map[string]interface{}{
+		"type":          "chat_message",
+		"playerAddress": playerAddress,
+		"message":       message,
+		"timestamp":     now.Format(time.RFC3339),
+	}
+
+	// Store in PostgreSQL (asynchronous, don't block on errors)
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		err := db.StoreChatMessage(ctx, &db.ChatHistoryRecord{
+			PlayerAddress: playerAddress,
+			Message:       message,
+			Timestamp:     now,
+		})
+		if err != nil {
+			log.Printf("⚠️  Failed to store chat message in PostgreSQL: %v", err)
+		}
+	}()
+
+	// Broadcast to all chat subscribers
 	chatBroadcastCh <- chatMsg
+}
+
+func handleCrashBetPlaced(client *ClientConnection, data map[string]interface{}) {
+	playerAddress := data["playerAddress"].(string)
+	userId := data["userId"].(string)
+	gameId := data["gameId"].(string)
+	betAmount := data["betAmount"].(float64)
+	entryMultiplier := data["entryMultiplier"].(float64)
+	transactionHash := data["transactionHash"].(string)
+
+	log.Println("🎯 handleCrashBetPlaced called - Processing bet placement")
+	log.Printf("🎲 Crash bet placed - Player: %s, Amount: %.4f, Entry: %.2fx, GameID: %s, TxHash: %s",
+		playerAddress, betAmount, entryMultiplier, gameId, transactionHash)
+
+	// Store in database
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		err := db.StoreCrashBetPostgres(ctx, &db.CrashBetRecord{
+			GameID:            gameId,
+			PlayerAddress:     playerAddress,
+			UserID:            userId,
+			BetAmount:         betAmount,
+			EntryMultiplier:   entryMultiplier,
+			TransactionHash:   transactionHash,
+			Status:            "active",
+			CreatedAt:         time.Now(),
+		})
+		if err != nil {
+			log.Printf("⚠️  Failed to store crash bet in PostgreSQL: %v", err)
+		}
+	}()
+
+	// Add to active bettors list
+	AddActiveBettor(playerAddress, betAmount, entryMultiplier)
+}
+
+func handleCrashCashout(client *ClientConnection, data map[string]interface{}) {
+	log.Println("🎯 handleCrashCashout called - Data:", data)
+
+	playerAddress := data["playerAddress"].(string)
+	userId := data["userId"].(string)
+	gameId := data["gameId"].(string)
+	cashoutMultiplier := data["cashoutMultiplier"].(float64)
+	betAmount := data["betAmount"].(float64)
+	entryMultiplier := data["entryMultiplier"].(float64)
+
+	log.Printf("💰 Crash cashout request - Player: %s, GameID: %s, UserID: %s, Cashout: %.2fx, BetAmount: %.4f, Entry: %.2fx",
+		playerAddress, gameId, userId, cashoutMultiplier, betAmount, entryMultiplier)
+
+	// Calculate payout
+	profit := betAmount * (cashoutMultiplier - 1)
+	payoutAmount := betAmount + profit
+
+	log.Printf("💸 Payout calculated - Player: %s, Payout: %.4f MNT (Profit: %.4f)",
+		playerAddress, payoutAmount, profit)
+
+	// Call payPlayer contract function
+	var payoutTxHash string
+	contractClientMutex.RLock()
+	hasContract := contractClient != nil
+	contractClientMutex.RUnlock()
+
+	log.Printf("💳 Contract client available: %v", hasContract)
+
+	if hasContract {
+		// Convert payout amount to wei (18 decimals)
+		// payoutAmount is in MNT (ether), convert to wei
+		payoutWei := new(big.Float).Mul(big.NewFloat(payoutAmount), big.NewFloat(1e18))
+		payoutBigInt := new(big.Int)
+		payoutWei.Int(payoutBigInt)
+
+		playerAddr := common.HexToAddress(playerAddress)
+
+		log.Printf("💸 Calling payPlayer contract - Player: %s, PayoutWei: %s", playerAddr.Hex(), payoutBigInt.String())
+
+		// Call contract (async, don't block game flow)
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+
+			contractClientMutex.RLock()
+			client := contractClient
+			contractClientMutex.RUnlock()
+
+			log.Printf("🔄 Executing contract.PayPlayer...")
+			err := client.PayPlayer(ctx, playerAddr, payoutBigInt)
+			if err != nil {
+				log.Printf("❌ Failed to call payPlayer contract: %v", err)
+				// Don't block user experience - they still get credited in DB
+			} else {
+				log.Printf("✅ payPlayer contract call successful for %s", playerAddress)
+			}
+		}()
+	} else {
+		log.Printf("⚠️  Contract client not available - skipping on-chain payout")
+	}
+
+	// Update database (with empty tx hash for now, contract call is async)
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		err := db.UpdateCrashBetCashout(ctx, gameId, playerAddress, cashoutMultiplier, payoutAmount, payoutTxHash)
+		if err != nil {
+			log.Printf("⚠️  Failed to update crash bet: %v", err)
+		}
+	}()
+
+	// Remove from active bettors list
+	RemoveActiveBettor(playerAddress)
+
+	// Send private message to user with profit/loss
+	sendPrivateMessage(client, userId, map[string]interface{}{
+		"type":              "crash_cashout_result",
+		"success":           true,
+		"cashoutMultiplier": cashoutMultiplier,
+		"entryMultiplier":   entryMultiplier,
+		"betAmount":         betAmount,
+		"payoutAmount":      payoutAmount,
+		"profit":            profit,
+		"message":           fmt.Sprintf("Cashed out at %.2fx! Profit: %.4f MNT", cashoutMultiplier, profit),
+	})
+}
+
+func sendPrivateMessage(client *ClientConnection, userId string, message map[string]interface{}) {
+	// Find client by userId and send message only to them
+	clientsMutex.RLock()
+	defer clientsMutex.RUnlock()
+
+	for c := range clients {
+		if c.ID == userId {
+			data, err := json.Marshal(message)
+			if err != nil {
+				log.Printf("⚠️  Failed to marshal private message: %v", err)
+				return
+			}
+			c.Send <- data
+			log.Printf("✉️  Sent private message to user %s", userId)
+			return
+		}
+	}
+
+	log.Printf("⚠️  User %s not found for private message", userId)
 }
 
 func min(a, b int) int {

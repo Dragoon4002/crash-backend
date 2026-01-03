@@ -37,13 +37,6 @@ var (
 	globalRoomClients      = make(map[*websocket.Conn]bool)
 	globalRoomClientsMutex sync.RWMutex
 
-	// Bot names for candleflip opponents
-	botNames = []string{
-		"TradingBot3000", "BullMarketBob", "BearTrapBetty", "CandleMaster",
-		"ChartWizard", "TrendFollower", "SwingTraderAI", "DayTraderDave",
-		"HODLBot", "MoonShotMike", "DiamondHandsDan", "PaperHandsPete",
-		"WhaleWatcher", "PumpChaser", "DipBuyer", "FOMOBot",
-	}
 )
 
 // BroadcastRoomUpdate sends room list to all subscribed clients via unified broadcast
@@ -64,17 +57,9 @@ func BroadcastRoomUpdate() {
 	roomsBroadcast <- message
 }
 
-// GetBotName returns a bot name based on seed for consistency across rooms
+// GetBotName always returns "AI" as the bot name
 func GetBotName(seed string) string {
-	// Use hash of seed to deterministically pick a bot name
-	hash := 0
-	for _, c := range seed {
-		hash = hash*31 + int(c)
-	}
-	if hash < 0 {
-		hash = -hash
-	}
-	return botNames[hash%len(botNames)]
+	return "AI"
 }
 
 // CreateRoom creates a new global room

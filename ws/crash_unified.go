@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"goLangServer/contract"
 	"goLangServer/crypto"
+	"goLangServer/db"
 	"goLangServer/game"
 )
 
@@ -17,7 +17,6 @@ import (
 type CrashGameHistory struct {
 	GameID         string             `json:"gameId"`
 	PeakMultiplier float64            `json:"peakMultiplier"`
-	Rugged         bool               `json:"rugged"`
 	Candles        []game.CandleGroup `json:"candles"`
 	Timestamp      time.Time          `json:"timestamp"`
 }
@@ -44,7 +43,6 @@ var (
 type CrashGameState struct {
 	GameID         string
 	ServerSeed     string
-	ServerSeedHash string
 	Status         string // "countdown", "running", "crashed"
 	ContractGameID *big.Int
 }
@@ -58,7 +56,7 @@ func runCrashGameLoop() {
 	log.Println("🎰 Crash game loop started")
 
 	for {
-		serverSeed, seedHash := crypto.GenerateServerSeed()
+		serverSeed, _ := crypto.GenerateServerSeed()
 		gameID := time.Now().Format("20060102-150405.000")
 
 		// Convert gameID to big.Int for contract (use Unix timestamp)
@@ -69,31 +67,39 @@ func runCrashGameLoop() {
 		currentCrashGame = &CrashGameState{
 			GameID:         gameID,
 			ServerSeed:     serverSeed,
-			ServerSeedHash: seedHash,
 			Status:         "countdown",
 			ContractGameID: contractGameID,
 		}
 		currentCrashGameMutex.Unlock()
 
-		// Broadcast game start (send contractGameID as string for client)
+		// Broadcast game start (NO server seed hash - not needed)
 		crashBroadcast <- map[string]interface{}{
 			"type": "game_start",
 			"data": map[string]interface{}{
-				"gameId":         contractGameID.String(), // Send contract game ID to client
-				"serverSeedHash": seedHash,
-				"startingPrice":  1.0,
+				"gameId":        contractGameID.String(),
+				"startingPrice": 1.0,
 			},
 		}
 
-		// Countdown: 3, 2, 1
-		for i := 3; i > 0; i-- {
+		// Countdown: 5.00 seconds down to 0.00
+		countdownDuration := 5.0 // seconds
+		countdownTick := 0.01    // 10ms per tick
+		for countdown := countdownDuration; countdown >= 0; countdown -= countdownTick {
 			crashBroadcast <- map[string]interface{}{
 				"type": "countdown",
 				"data": map[string]interface{}{
-					"countdown": i,
+					"countdown": math.Max(0, countdown), // Ensure it doesn't go negative
 				},
 			}
-			time.Sleep(1 * time.Second)
+			time.Sleep(10 * time.Millisecond)
+		}
+
+		// Send final 0.00 countdown
+		crashBroadcast <- map[string]interface{}{
+			"type": "countdown",
+			"data": map[string]interface{}{
+				"countdown": 0.0,
+			},
 		}
 
 		// Update status to running
@@ -101,14 +107,16 @@ func runCrashGameLoop() {
 		currentCrashGame.Status = "running"
 		currentCrashGameMutex.Unlock()
 
-		// Run game simulation
+		// Calculate game result using provably fair engine
+		gameResult := game.CalculateGame(serverSeed, gameID)
+
+		// Run live simulation for real-time broadcast
 		combined := serverSeed + "-" + gameID
 		rng := game.NewSeededRNG(combined)
 
 		price := 1.0
-		peak := 1.0
 		tick := 0
-		rugged := false
+		reachedPredeterminedPeak := false
 
 		// Candle grouping state
 		var groups []game.CandleGroup
@@ -116,42 +124,78 @@ func runCrashGameLoop() {
 		groupDuration := int64(InitialGroupDurationMs)
 		groupStartTime := time.Now().UnixMilli()
 
-		for tick < 5000 {
-			if rng.Float64() < game.RugProb {
-				rugged = true
+		// Run until rug (same logic as CalculateGame)
+		for tick < 10000 {
+			// Determine rug probability
+			rugProb := game.RugProbBeforePeak
+			if reachedPredeterminedPeak {
+				rugProb = game.RugProbAfterPeak
+			}
+
+			// Check for rug
+			if tick > 20 && rng.Float64() < rugProb {
 				break
 			}
 
-			// God candle
+			// Check if reached predetermined peak
+			if price >= gameResult.PeakMultiplier {
+				reachedPredeterminedPeak = true
+			}
+
+			// God candle (with directional bias)
 			if rng.Float64() < game.GodCandleChance && price <= 100 {
-				price *= game.GodCandleMult
+				// Before peak: 60% chance down, 40% chance up
+				// After peak: 40% chance down, 60% chance up
+				var godCandleChange float64
+				directionThreshold := 0.6 // 60% threshold
+				if reachedPredeterminedPeak {
+					directionThreshold = 0.4 // 40% threshold (reversed)
+				}
+
+				if rng.Float64() < directionThreshold {
+					// Down movement
+					godCandleChange = -game.GodCandleMult
+				} else {
+					// Up movement
+					godCandleChange = game.GodCandleMult
+				}
+
+				if godCandleChange > 0 {
+					price *= godCandleChange
+				} else {
+					price /= -godCandleChange
+				}
 			} else {
 				var change float64
 
-				// Big move
+				// Big move with directional bias
 				if rng.Float64() < game.BigMoveChance {
 					move := game.BigMoveMin + rng.Float64()*(game.BigMoveMax-game.BigMoveMin)
-					if rng.Float64() > 0.5 {
-						change = move
+
+					// Before peak: 60% chance up, 40% chance down
+					// After peak: 40% chance up, 60% chance down
+					upwardThreshold := 0.6 // 60% chance upward before peak
+					if reachedPredeterminedPeak {
+						upwardThreshold = 0.4 // 40% chance upward after peak
+					}
+
+					if rng.Float64() < upwardThreshold {
+						change = move // Upward
 					} else {
-						change = -move
+						change = -move // Downward
 					}
 				} else {
 					// Normal drift
 					drift := game.DriftMin + rng.Float64()*(game.DriftMax-game.DriftMin)
-					volatility := 0.005 * math.Min(10, math.Sqrt(price))
+					volatility := 0.015 * math.Min(15, math.Sqrt(price))
 					noise := volatility * (2*rng.Float64() - 1)
 					change = drift + noise
 				}
 
 				price = price * (1 + change)
-				if price < 0 {
-					price = 0
+				if price < 0.5 {
+					price = 0.5
 				}
-			}
-
-			if price > peak {
-				peak = price
 			}
 
 			// Candle grouping logic
@@ -225,6 +269,7 @@ func runCrashGameLoop() {
 			message := map[string]interface{}{
 				"type": "price_update",
 				"data": map[string]interface{}{
+					"gameId":          contractGameID.String(),
 					"tick":            tick,
 					"price":           price,
 					"multiplier":      price,
@@ -245,14 +290,7 @@ func runCrashGameLoop() {
 
 		// Complete final group
 		if currentGroup != nil && !currentGroup.IsComplete {
-			var finalCloseValue float64
-			if rugged {
-				finalCloseValue = 0.0
-				currentGroup.Min = 0.0
-			} else {
-				finalCloseValue = *currentGroup.Close
-			}
-
+			finalCloseValue := *currentGroup.Close
 			finalGroup := game.CandleGroup{
 				Open:       currentGroup.Open,
 				Close:      &finalCloseValue,
@@ -271,37 +309,14 @@ func runCrashGameLoop() {
 		currentCrashGame.Status = "crashed"
 		currentCrashGameMutex.Unlock()
 
-		// Call rugGame on contract if game rugged
-		if rugged {
-			go func() {
-				contractClient, err := contract.NewGameHouseContract()
-				if err != nil {
-					log.Printf("⚠️  Failed to initialize contract client: %v", err)
-					return
-				}
-				defer contractClient.Close()
-
-				ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-				defer cancel()
-
-				txHash, err := contractClient.RugGame(ctx, contractGameID)
-				if err != nil {
-					log.Printf("⚠️  Failed to call rugGame on contract: %v", err)
-				} else {
-					log.Printf("✅ rugGame called on contract - TX: %s", txHash)
-				}
-			}()
-		}
-
-		// Broadcast game end
+		// Broadcast game end (with server seed for verification)
 		crashBroadcast <- map[string]interface{}{
 			"type": "game_end",
 			"data": map[string]interface{}{
 				"gameId":          contractGameID.String(),
 				"serverSeed":      serverSeed,
-				"serverSeedHash":  seedHash,
-				"peakMultiplier":  peak,
-				"rugged":          rugged,
+				"peakMultiplier":  gameResult.PeakMultiplier,
+				"finalPrice":      price,
 				"totalTicks":      tick,
 				"previousCandles": groups,
 			},
@@ -311,8 +326,7 @@ func runCrashGameLoop() {
 		gameHistoryMutex.Lock()
 		crashGameHistory = append(crashGameHistory, CrashGameHistory{
 			GameID:         gameID,
-			PeakMultiplier: peak,
-			Rugged:         rugged,
+			PeakMultiplier: gameResult.PeakMultiplier,
 			Candles:        groups,
 			Timestamp:      time.Now(),
 		})
@@ -322,13 +336,27 @@ func runCrashGameLoop() {
 		}
 		gameHistoryMutex.Unlock()
 
-		log.Printf("🎲 Crash game %s finished - Peak: %.2fx, Rugged: %v", gameID, peak, rugged)
+		// Broadcast updated history to all crash subscribers
+		broadcastCrashHistory()
+
+		log.Printf("🎲 Crash game %s finished - Peak: %.2fx, Final: %.2fx", gameID, gameResult.PeakMultiplier, price)
+
+		// Mark all remaining active bets as lost in database
+		go func(gid string) {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			err := db.MarkBetsAsLost(ctx, gid)
+			if err != nil {
+				log.Printf("⚠️  Failed to mark bets as lost: %v", err)
+			}
+		}(contractGameID.String())
 
 		// Clear all active bettors for next game
 		ClearActiveBettors()
 
-		// Wait before next game
-		time.Sleep(15 * time.Second)
+		// Wait 10 seconds before next game
+		time.Sleep(10 * time.Second)
 	}
 }
 
@@ -399,3 +427,28 @@ func broadcastActiveBettors() {
 		"count":   len(list),
 	}
 }
+
+// GetCrashHistory returns a copy of the crash game history
+func GetCrashHistory() []CrashGameHistory {
+	gameHistoryMutex.RLock()
+	defer gameHistoryMutex.RUnlock()
+
+	// Create copy to avoid concurrent modification
+	history := make([]CrashGameHistory, len(crashGameHistory))
+	copy(history, crashGameHistory)
+	return history
+}
+
+// broadcastCrashHistory sends crash history to all crash subscribers
+func broadcastCrashHistory() {
+	gameHistoryMutex.RLock()
+	history := make([]CrashGameHistory, len(crashGameHistory))
+	copy(history, crashGameHistory)
+	gameHistoryMutex.RUnlock()
+
+	crashBroadcast <- map[string]interface{}{
+		"type":    "crash_history",
+		"history": history,
+	}
+}
+

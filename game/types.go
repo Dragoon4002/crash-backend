@@ -14,9 +14,7 @@ type CandleGroup struct {
 type GameResult struct {
 	PeakMultiplier float64
 	FinalPrice     float64
-	Rugged         bool
 	TotalTicks     int
 	ServerSeed     string
-	ServerSeedHash string
 	GameID         string
 }

@@ -4,15 +4,16 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/big"
 	"net/http"
 	"sync"
 	"time"
 
+	"goLangServer/config"
 	"goLangServer/contract"
 	"goLangServer/crypto"
 	"goLangServer/game"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/websocket"
 )
 
@@ -196,8 +197,8 @@ func runCandleflipRoom(room *CandleflipRoom) {
 				},
 			})
 
-			// 100ms per tick = 4 seconds total for 40 ticks
-			time.Sleep(100 * time.Millisecond)
+			// 200ms per tick = 8 seconds total for 40 ticks
+			time.Sleep(200 * time.Millisecond)
 		}
 
 		// Determine winner
@@ -236,9 +237,13 @@ func runCandleflipRoom(room *CandleflipRoom) {
 		globalRoomsMutex.RLock()
 		var contractGameIDStr string
 		var roomsCount int
+		var playerAddress string
+		var betAmount float64
 		if globalRoom, exists := globalRooms[room.RoomID]; exists {
 			contractGameIDStr = globalRoom.ContractGameID
 			roomsCount = globalRoom.RoomsCount
+			playerAddress = globalRoom.CreatorId
+			betAmount = globalRoom.BetAmount
 		}
 		globalRoomsMutex.RUnlock()
 
@@ -270,41 +275,48 @@ func runCandleflipRoom(room *CandleflipRoom) {
 			// Only the last room to finish calls the contract
 			if shouldResolve {
 				log.Printf("📊 All %d rooms finished for game %s. Total won: %d", roomsCount, contractGameIDStr, finalRoomsWon)
-				go func() {
-					contractClient, err := contract.NewGameHouseContract()
-					if err != nil {
-						log.Printf("⚠️  Failed to initialize contract client for CandleFlip: %v", err)
-						return
-					}
-					defer contractClient.Close()
 
-					// Parse contract game ID
-					contractGameID := new(big.Int)
-					contractGameID, ok := contractGameID.SetString(contractGameIDStr, 10)
-					if !ok {
-						log.Printf("⚠️  Failed to parse contract game ID: %s", contractGameIDStr)
-						return
-					}
+				// Pay player if they won any rooms
+				if finalRoomsWon > 0 && playerAddress != "" {
+					go func() {
+						contractClient, err := contract.NewGameHouseContract()
+						if err != nil {
+							log.Printf("⚠️  Failed to initialize contract client for CandleFlip: %v", err)
+							return
+						}
+						defer contractClient.Close()
 
-					// Total rooms won
-					totalRoomsWon := big.NewInt(int64(finalRoomsWon))
+						// Calculate payout: betAmount * roomsWon * 2 (2x return on winning rooms)
+						payoutMNT := betAmount * float64(finalRoomsWon) * 2.0
+						payoutWei := config.MNTToWei(payoutMNT)
 
-					ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-					defer cancel()
+						// Convert player address string to common.Address
+						playerAddr := common.HexToAddress(playerAddress)
 
-					txHash, err := contractClient.ResolveCandleFlip(ctx, contractGameID, totalRoomsWon)
-					if err != nil {
-						log.Printf("⚠️  Failed to call resolveCandleFlip on contract: %v", err)
-					} else {
-						log.Printf("✅ resolveCandleFlip called - GameID: %s, RoomsWon: %d/%d, TX: %s",
-							contractGameIDStr, finalRoomsWon, roomsCount, txHash)
-					}
+						ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+						defer cancel()
 
-					// Clean up tracker
+						err = contractClient.PayPlayer(ctx, playerAddr, payoutWei)
+						if err != nil {
+							log.Printf("⚠️  Failed to call PayPlayer on contract: %v", err)
+						} else {
+							log.Printf("✅ PayPlayer called - Player: %s, RoomsWon: %d/%d, Payout: %.4f MNT",
+								playerAddress, finalRoomsWon, roomsCount, payoutMNT)
+						}
+
+						// Clean up tracker
+						contractGameMutex.Lock()
+						delete(contractGameResults, contractGameIDStr)
+						contractGameMutex.Unlock()
+					}()
+				} else {
+					log.Printf("📝 Player won 0/%d rooms - no payout", roomsCount)
+
+					// Clean up tracker even if no payout
 					contractGameMutex.Lock()
 					delete(contractGameResults, contractGameIDStr)
 					contractGameMutex.Unlock()
-				}()
+				}
 			} else {
 				log.Printf("📝 Room %s finished (%d/%d). Waiting for all rooms...", room.RoomID, tracker.FinishedRooms, tracker.TotalRooms)
 			}

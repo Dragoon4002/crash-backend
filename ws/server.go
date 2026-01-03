@@ -20,8 +20,8 @@ var upgrader = websocket.Upgrader{
 var clientCount int64
 
 const (
-	InitialGroupDurationMs = 1000 // 1 second candles
-	MergeThreshold         = 25   // Merge when we have 10+ groups
+	InitialGroupDurationMs = 5000 // 5 seconds candles
+	MergeThreshold         = 30    // Merge when we have 30+ groups
 )
 
 func mergeGroups(groups []game.CandleGroup, currentDuration int64) ([]game.CandleGroup, int64) {
@@ -129,7 +129,7 @@ func HandleWS(w http.ResponseWriter, r *http.Request) {
 		groupStartTime := time.Now().UnixMilli()
 
 		for tick < 5000 {
-			if rng.Float64() < game.RugProb {
+			if rng.Float64() < game.RugProbBeforePeak {
 				rugged = true
 				break
 			}
