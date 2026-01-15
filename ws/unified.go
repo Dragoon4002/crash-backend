@@ -329,6 +329,27 @@ func (c *ClientConnection) handleMessage(msg ClientMessage) {
 		roomID := msg.Data["roomId"].(string)
 		handleJoinCandleflipRoom(c, roomID)
 
+	case "create_batch":
+		// Forward to candleflip batch creation (fallback handler)
+		address, _ := msg.Data["address"].(string)
+		roomCountFloat, _ := msg.Data["roomCount"].(float64)
+		roomCount := int(roomCountFloat)
+		amountPerRoom, _ := msg.Data["amountPerRoom"].(string)
+		side, _ := msg.Data["side"].(string)
+
+		batchID, err := CreateBatchFromData(address, roomCount, amountPerRoom, side)
+		if err != nil {
+			c.writeJSON(map[string]interface{}{
+				"type":  "error",
+				"error": err.Error(),
+			})
+			return
+		}
+		c.writeJSON(map[string]interface{}{
+			"type":    "batch_created",
+			"batchId": batchID,
+		})
+
 	default:
 		log.Printf("⚠️  Unknown message type from client %s: %s", c.ID, msg.Type)
 	}

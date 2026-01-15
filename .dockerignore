@@ -1,0 +1,6 @@
+.git
+*.log
+server
+goLangServer
+.env
+*.md

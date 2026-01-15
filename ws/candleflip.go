@@ -155,6 +155,87 @@ func HandleCandleflipWS(w http.ResponseWriter, r *http.Request) {
 	log.Printf("👋 CandleFlip client disconnected")
 }
 
+// CreateBatchFromData creates and starts a candleflip batch (exported for use from unified.go)
+// Returns batchID on success, error on failure
+func CreateBatchFromData(address string, roomCount int, amountPerRoom string, side string) (string, error) {
+	// Validate inputs
+	if address == "" {
+		return "", fmt.Errorf("address is required")
+	}
+	if roomCount < 1 || roomCount > 100 {
+		return "", fmt.Errorf("room count must be between 1 and 100")
+	}
+	if amountPerRoom == "" {
+		return "", fmt.Errorf("amount per room is required")
+	}
+	if side != "bull" && side != "bear" {
+		return "", fmt.Errorf("side must be 'bull' or 'bear'")
+	}
+
+	// Parse amount
+	playerAddr := common.HexToAddress(address)
+	amountWei, ok := new(big.Int).SetString(amountPerRoom, 10)
+	if !ok {
+		return "", fmt.Errorf("invalid amount format")
+	}
+
+	// Create batch
+	batchID := fmt.Sprintf("batch-%s-%d", playerAddr.Hex()[:8], time.Now().UnixNano())
+	serverSeed, seedHash := crypto.GenerateServerSeed()
+
+	batch := &CandleflipBatch{
+		BatchID:        batchID,
+		PlayerAddress:  playerAddr,
+		AmountPerRoom:  amountWei,
+		TotalRooms:     roomCount,
+		PlayerSide:     side,
+		Rooms:          make([]*Room, roomCount),
+		ServerSeed:     serverSeed,
+		ServerSeedHash: seedHash,
+		Status:         "waiting",
+		CreatedAt:      time.Now(),
+	}
+
+	// Initialize rooms
+	for i := 0; i < roomCount; i++ {
+		batch.Rooms[i] = &Room{
+			RoomNumber: i + 1,
+			Status:     "waiting",
+		}
+	}
+
+	// Store batch
+	candleflipBatchesMutex.Lock()
+	if _, exists := candleflipBatches[batchID]; exists {
+		candleflipBatchesMutex.Unlock()
+		return "", fmt.Errorf("batch ID collision, retry")
+	}
+	candleflipBatches[batchID] = batch
+	candleflipBatchesMutex.Unlock()
+
+	log.Printf("🎮 CandleFlip batch created - Batch: %s, Player: %s, Rooms: %d, Amount: %s, Side: %s",
+		batchID, address, roomCount, amountPerRoom, side)
+
+	// Broadcast batch start to all clients
+	broadcastToAllCandleflipClients(map[string]interface{}{
+		"type": "batch_start",
+		"data": map[string]interface{}{
+			"batchId":        batchID,
+			"playerAddress":  playerAddr.Hex(),
+			"totalRooms":     roomCount,
+			"amountPerRoom":  amountPerRoom,
+			"playerSide":     side,
+			"aiSide":         getOppositeSide(side),
+			"serverSeedHash": seedHash,
+		},
+	})
+
+	// Start game in background
+	go runCandleflipBatch(batch)
+
+	return batchID, nil
+}
+
 // Handle incoming messages
 func handleCandleflipMessage(conn *websocket.Conn, message []byte) {
 	var msg CreateBatchMessage
@@ -172,113 +253,20 @@ func handleCandleflipMessage(conn *websocket.Conn, message []byte) {
 		return
 	}
 
-	// Validate inputs
-	if msg.Address == "" {
+	batchID, err := CreateBatchFromData(msg.Address, msg.RoomCount, msg.AmountPerRoom, msg.Side)
+	if err != nil {
 		conn.WriteJSON(map[string]interface{}{
 			"type":  "error",
-			"error": "Address is required",
+			"error": err.Error(),
 		})
 		return
 	}
-
-	if msg.RoomCount < 1 || msg.RoomCount > 100 {
-		conn.WriteJSON(map[string]interface{}{
-			"type":  "error",
-			"error": "Room count must be between 1 and 100",
-		})
-		return
-	}
-
-	if msg.AmountPerRoom == "" {
-		conn.WriteJSON(map[string]interface{}{
-			"type":  "error",
-			"error": "Amount per room is required",
-		})
-		return
-	}
-
-	if msg.Side != "bull" && msg.Side != "bear" {
-		conn.WriteJSON(map[string]interface{}{
-			"type":  "error",
-			"error": "Side must be 'bull' or 'bear'",
-		})
-		return
-	}
-
-	// Parse amount
-	playerAddr := common.HexToAddress(msg.Address)
-	amountWei, ok := new(big.Int).SetString(msg.AmountPerRoom, 10)
-	if !ok {
-		conn.WriteJSON(map[string]interface{}{
-			"type":  "error",
-			"error": "Invalid amount format",
-		})
-		return
-	}
-
-	// Create batch
-	batchID := fmt.Sprintf("batch-%s-%d", playerAddr.Hex()[:8], time.Now().UnixNano())
-	serverSeed, seedHash := crypto.GenerateServerSeed()
-
-	batch := &CandleflipBatch{
-		BatchID:        batchID,
-		PlayerAddress:  playerAddr,
-		AmountPerRoom:  amountWei,
-		TotalRooms:     msg.RoomCount,
-		PlayerSide:     msg.Side,
-		Rooms:          make([]*Room, msg.RoomCount),
-		ServerSeed:     serverSeed,
-		ServerSeedHash: seedHash,
-		Status:         "waiting",
-		CreatedAt:      time.Now(),
-	}
-
-	// Initialize rooms
-	for i := 0; i < msg.RoomCount; i++ {
-		batch.Rooms[i] = &Room{
-			RoomNumber: i + 1,
-			Status:     "waiting",
-		}
-	}
-
-	// Store batch
-	candleflipBatchesMutex.Lock()
-	if _, exists := candleflipBatches[batchID]; exists {
-			candleflipBatchesMutex.Unlock()
-			conn.WriteJSON(map[string]interface{}{
-					"type":  "error",
-					"error": "Batch ID collision, retry",
-			})
-			return
-	}
-	candleflipBatches[batchID] = batch
-	candleflipBatchesMutex.Unlock()
-
-	log.Printf("🎮 CandleFlip batch created - Batch: %s, Player: %s, Rooms: %d, Amount: %s, Side: %s",
-		batchID, msg.Address, msg.RoomCount, msg.AmountPerRoom, msg.Side)
 
 	// Send batch_created response to requester
 	conn.WriteJSON(map[string]interface{}{
 		"type":    "batch_created",
 		"batchId": batchID,
 	})
-
-	// Broadcast batch start to all clients
-	broadcastToAllCandleflipClients(map[string]interface{}{
-		"type": "batch_start",
-		"data": map[string]interface{}{
-			"batchId":        batchID,
-			"playerAddress":  playerAddr.Hex(),
-			"totalRooms":     msg.RoomCount,
-			"amountPerRoom":  msg.AmountPerRoom,
-			"playerSide":     msg.Side,
-			"aiSide":         getOppositeSide(msg.Side),
-			"serverSeedHash": seedHash,
-		},
-	})
-
-	// Start game in background
-	go runCandleflipBatch(batch)
 }
 
 // Run the batch game
