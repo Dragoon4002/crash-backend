@@ -29,7 +29,7 @@ type ActiveBettor struct {
 	BetTime         time.Time `json:"betTime"`
 }
 
-const MaxGameHistory = 10
+const MaxGameHistory = 15
 
 var (
 	crashGameHistory      []CrashGameHistory
@@ -47,9 +47,42 @@ type CrashGameState struct {
 	ContractGameID *big.Int
 }
 
-func init() {
-	// Start the crash game loop
+// StartCrashGameLoop starts the crash game loop - call after DB init
+func StartCrashGameLoop() {
 	go runCrashGameLoop()
+}
+
+// LoadCrashHistoryFromDB loads recent crash history from database into memory
+func LoadCrashHistoryFromDB() {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	records, err := db.GetRecentCrashHistory(ctx, MaxGameHistory)
+	if err != nil {
+		log.Printf("⚠️  Failed to load crash history from DB: %v", err)
+		return
+	}
+
+	if len(records) == 0 {
+		log.Println("📭 No crash history found in DB")
+		return
+	}
+
+	gameHistoryMutex.Lock()
+	defer gameHistoryMutex.Unlock()
+
+	// Convert DB records to in-memory format (reverse to get oldest first)
+	for i := len(records) - 1; i >= 0; i-- {
+		r := records[i]
+		crashGameHistory = append(crashGameHistory, CrashGameHistory{
+			GameID:         r.GameID,
+			PeakMultiplier: r.Peak,
+			Candles:        r.CandlestickHistory,
+			Timestamp:      r.CreatedAt,
+		})
+	}
+
+	log.Printf("📥 Loaded %d crash games from DB", len(crashGameHistory))
 }
 
 func runCrashGameLoop() {
@@ -323,18 +356,36 @@ func runCrashGameLoop() {
 		}
 
 		// Add to history
+		now := time.Now()
 		gameHistoryMutex.Lock()
 		crashGameHistory = append(crashGameHistory, CrashGameHistory{
 			GameID:         gameID,
 			PeakMultiplier: gameResult.PeakMultiplier,
 			Candles:        groups,
-			Timestamp:      time.Now(),
+			Timestamp:      now,
 		})
-		// Keep only last 10 games
+		// Keep only last MaxGameHistory (15) games
 		if len(crashGameHistory) > MaxGameHistory {
 			crashGameHistory = crashGameHistory[len(crashGameHistory)-MaxGameHistory:]
 		}
 		gameHistoryMutex.Unlock()
+
+		// Store to database
+		go func(gid, seed string, peak float64, candles []game.CandleGroup, ts time.Time) {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			err := db.StoreCrashHistory(ctx, &db.CrashHistoryRecord{
+				GameID:             gid,
+				ServerSeed:         seed,
+				Peak:               peak,
+				CandlestickHistory: candles,
+				CreatedAt:          ts,
+			})
+			if err != nil {
+				log.Printf("⚠️  Failed to store crash history: %v", err)
+			}
+		}(gameID, serverSeed, gameResult.PeakMultiplier, groups, now)
 
 		// Broadcast updated history to all crash subscribers
 		broadcastCrashHistory()

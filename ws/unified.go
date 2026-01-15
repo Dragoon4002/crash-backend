@@ -518,6 +518,11 @@ func handleCrashBetPlaced(client *ClientConnection, data map[string]interface{})
 		if err != nil {
 			log.Printf("⚠️  Failed to store crash bet in PostgreSQL: %v", err)
 		}
+
+		// Subtract bet amount from wallet PnL
+		if err := db.SubtractWalletPnL(ctx, playerAddress, betAmount); err != nil {
+			log.Printf("⚠️  Failed to update wallet PnL: %v", err)
+		}
 	}()
 
 	// Add to active bettors list
@@ -593,6 +598,11 @@ func handleCrashCashout(client *ClientConnection, data map[string]interface{}) {
 		err := db.UpdateCrashBetCashout(ctx, gameId, playerAddress, cashoutMultiplier, payoutAmount, payoutTxHash)
 		if err != nil {
 			log.Printf("⚠️  Failed to update crash bet: %v", err)
+		}
+
+		// Add payout amount to wallet PnL
+		if err := db.AddWalletPnL(ctx, playerAddress, payoutAmount); err != nil {
+			log.Printf("⚠️  Failed to update wallet PnL: %v", err)
 		}
 	}()
 

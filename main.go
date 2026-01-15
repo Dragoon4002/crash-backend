@@ -23,8 +23,14 @@ func main() {
 	if err := db.InitPostgres(); err != nil {
 		log.Printf("⚠️  Warning: PostgreSQL initialization failed: %v", err)
 		log.Println("   Chat history and crash history features will be disabled")
+	} else {
+		// Load crash history from DB into memory
+		ws.LoadCrashHistoryFromDB()
 	}
 	defer db.ClosePostgres()
+
+	// Start crash game loop after DB is ready
+	ws.StartCrashGameLoop()
 
 	if err := db.InitRedis(); err != nil {
 		log.Printf("⚠️  Warning: Redis initialization failed: %v", err)
@@ -53,6 +59,7 @@ func main() {
 	http.HandleFunc("/api/bettor/add", api.HandleAddBettor)
 	http.HandleFunc("/api/bettor/remove", api.HandleRemoveBettor)
 	http.HandleFunc("/api/bettor/list", api.HandleGetActiveBettors)
+	http.HandleFunc("/api/leaderboard", api.HandleGetLeaderboard)
 
 	addr := "0.0.0.0:8080"
 	log.Printf("🚀 Server starting on %s", addr)

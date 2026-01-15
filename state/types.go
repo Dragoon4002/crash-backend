@@ -151,7 +151,7 @@ func NewCrashGameState() *CrashGameState {
 		Phase:            CrashPhaseWaiting,
 		CompletedCandles: make([]*CandleGroup, 0),
 		ActiveBettors:    make(map[string]*ActiveBettor),
-		GameHistory:      make([]CrashGameHistory, 0, 10),
+		GameHistory:      make([]CrashGameHistory, 0, 15),
 	}
 }
 
@@ -180,8 +180,8 @@ func (c *CrashGameState) AddToHistory(history CrashGameHistory) {
 	defer c.mu.Unlock()
 
 	c.GameHistory = append(c.GameHistory, history)
-	if len(c.GameHistory) > 10 {
-		c.GameHistory = c.GameHistory[len(c.GameHistory)-10:]
+	if len(c.GameHistory) > 15 {
+		c.GameHistory = c.GameHistory[len(c.GameHistory)-15:]
 	}
 }
 

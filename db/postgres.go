@@ -165,6 +165,20 @@ func InitSchema(ctx context.Context) error {
 		return fmt.Errorf("failed to create crash_bets table: %w", err)
 	}
 
+	// Create wallet_pnl table
+	walletPnLSchema := `
+	CREATE TABLE IF NOT EXISTS wallet_pnl (
+		wallet_address TEXT PRIMARY KEY,
+		amount DOUBLE PRECISION NOT NULL DEFAULT 0
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_wallet_pnl_amount ON wallet_pnl(amount DESC);
+	`
+
+	if _, err := PostgresPool.Exec(ctx, walletPnLSchema); err != nil {
+		return fmt.Errorf("failed to create wallet_pnl table: %w", err)
+	}
+
 	log.Println("✅ Database schema initialized")
 	return nil
 }
@@ -543,4 +557,129 @@ func HealthCheckPostgres(ctx context.Context) error {
 		return fmt.Errorf("PostgreSQL connection pool not initialized")
 	}
 	return PostgresPool.Ping(ctx)
+}
+
+/* =========================
+   WALLET PNL
+========================= */
+
+// WalletPnLRecord represents a wallet's cumulative PnL
+type WalletPnLRecord struct {
+	WalletAddress string  `json:"walletAddress"`
+	Amount        float64 `json:"amount"`
+	Rank          int     `json:"rank,omitempty"`
+}
+
+// SubtractWalletPnL subtracts bet amount from wallet's PnL (upsert)
+func SubtractWalletPnL(ctx context.Context, walletAddress string, betAmount float64) error {
+	if PostgresPool == nil {
+		log.Println("⚠️  PostgreSQL not initialized, skipping PnL update")
+		return nil
+	}
+
+	query := `
+		INSERT INTO wallet_pnl (wallet_address, amount)
+		VALUES ($1, 0 - $2)
+		ON CONFLICT (wallet_address) DO UPDATE
+		SET amount = wallet_pnl.amount - $2
+	`
+
+	_, err := PostgresPool.Exec(ctx, query, walletAddress, betAmount)
+	if err != nil {
+		return fmt.Errorf("failed to subtract wallet PnL: %w", err)
+	}
+
+	log.Printf("📉 Subtracted %.4f from wallet %s PnL", betAmount, walletAddress)
+	return nil
+}
+
+// AddWalletPnL adds payout amount to wallet's PnL
+func AddWalletPnL(ctx context.Context, walletAddress string, payoutAmount float64) error {
+	if PostgresPool == nil {
+		log.Println("⚠️  PostgreSQL not initialized, skipping PnL update")
+		return nil
+	}
+
+	query := `
+		INSERT INTO wallet_pnl (wallet_address, amount)
+		VALUES ($1, $2)
+		ON CONFLICT (wallet_address) DO UPDATE
+		SET amount = wallet_pnl.amount + $2
+	`
+
+	_, err := PostgresPool.Exec(ctx, query, walletAddress, payoutAmount)
+	if err != nil {
+		return fmt.Errorf("failed to add wallet PnL: %w", err)
+	}
+
+	log.Printf("📈 Added %.4f to wallet %s PnL", payoutAmount, walletAddress)
+	return nil
+}
+
+// GetWalletPnLLeaderboard returns top N wallets sorted by PnL descending
+func GetWalletPnLLeaderboard(ctx context.Context, limit int) ([]*WalletPnLRecord, error) {
+	if PostgresPool == nil {
+		return []*WalletPnLRecord{}, nil
+	}
+
+	query := `
+		SELECT wallet_address, amount,
+		       ROW_NUMBER() OVER (ORDER BY amount DESC) as rank
+		FROM wallet_pnl
+		ORDER BY amount DESC
+		LIMIT $1
+	`
+
+	rows, err := PostgresPool.Query(ctx, query, limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query leaderboard: %w", err)
+	}
+	defer rows.Close()
+
+	var records []*WalletPnLRecord
+	for rows.Next() {
+		var record WalletPnLRecord
+		if err := rows.Scan(&record.WalletAddress, &record.Amount, &record.Rank); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		records = append(records, &record)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating rows: %w", err)
+	}
+
+	return records, nil
+}
+
+// GetWalletPnLRank returns a specific wallet's rank and PnL
+func GetWalletPnLRank(ctx context.Context, walletAddress string) (*WalletPnLRecord, error) {
+	if PostgresPool == nil {
+		return nil, nil
+	}
+
+	query := `
+		SELECT wallet_address, amount, rank FROM (
+			SELECT wallet_address, amount,
+			       ROW_NUMBER() OVER (ORDER BY amount DESC) as rank
+			FROM wallet_pnl
+		) ranked
+		WHERE wallet_address = $1
+	`
+
+	var record WalletPnLRecord
+	err := PostgresPool.QueryRow(ctx, query, walletAddress).Scan(
+		&record.WalletAddress,
+		&record.Amount,
+		&record.Rank,
+	)
+
+	if err == pgx.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get wallet rank: %w", err)
+	}
+
+	return &record, nil
 }
