@@ -443,12 +443,8 @@ func handleCreateRoom(data map[string]interface{}) {
 		log.Printf("🎮 Candleflip room %s created by %s vs Bot '%s' (player side: %s, contractGameId: %s)",
 			roomID, creatorId, GetBotName(botNameSeed), trend, contractGameId)
 
-		// Start the game AFTER room is fully configured
-		// Use a small delay to ensure clients can connect before game starts
-		go func() {
-			time.Sleep(500 * time.Millisecond) // Give clients time to connect
-			StartCandleflipGame(roomID)
-		}()
+		// Game will auto-start when client connects to /candleflip WebSocket
+		// No need to start here - prevents race condition with multiple rooms
 	}
 }
 

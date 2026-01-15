@@ -24,57 +24,6 @@ const (
 	MergeThreshold         = 30    // Merge when we have 30+ groups
 )
 
-func mergeGroups(groups []game.CandleGroup, currentDuration int64) ([]game.CandleGroup, int64) {
-	newGroups := make([]game.CandleGroup, 0)
-
-	// Merge pairs
-	for i := 0; i < len(groups)-1; i += 2 {
-		g1 := groups[i]
-		g2 := groups[i+1]
-
-		// Create a new slice for merged values to avoid shared references
-		mergedValues := make([]float64, 0, len(g1.ValueList)+len(g2.ValueList))
-		mergedValues = append(mergedValues, g1.ValueList...)
-		mergedValues = append(mergedValues, g2.ValueList...)
-
-		merged := game.CandleGroup{
-			Open:       g1.Open,
-			Close:      g2.Close,
-			Max:        math.Max(g1.Max, g2.Max),
-			Min:        math.Min(g1.Min, g2.Min),
-			ValueList:  mergedValues,
-			StartTime:  g1.StartTime,
-			DurationMs: g1.DurationMs * 2,
-			IsComplete: true,
-		}
-		newGroups = append(newGroups, merged)
-	}
-
-	// If odd number, add the last one with a deep copy
-	if len(groups)%2 == 1 {
-		lastGroup := groups[len(groups)-1]
-		copiedValues := make([]float64, len(lastGroup.ValueList))
-		copy(copiedValues, lastGroup.ValueList)
-
-		lastGroupCopy := game.CandleGroup{
-			Open:       lastGroup.Open,
-			Close:      lastGroup.Close,
-			Max:        lastGroup.Max,
-			Min:        lastGroup.Min,
-			ValueList:  copiedValues,
-			StartTime:  lastGroup.StartTime,
-			DurationMs: lastGroup.DurationMs,
-			IsComplete: lastGroup.IsComplete,
-		}
-		newGroups = append(newGroups, lastGroupCopy)
-	}
-
-	// Double the duration for next groups
-	newDuration := currentDuration * 2
-
-	return newGroups, newDuration
-}
-
 func HandleWS(w http.ResponseWriter, r *http.Request) {
 	log.Println("📥 WebSocket connection attempt from:", r.RemoteAddr)
 

@@ -2,6 +2,7 @@ package game
 
 import (
 	"math"
+	"math/rand"
 )
 
 const (
@@ -190,5 +191,26 @@ func CalculateGame(serverSeed, gameID string) GameResult {
 		TotalTicks:     tick,
 		ServerSeed:     serverSeed,
 		GameID:         gameID,
+	}
+}
+
+// determineTargetPeak generates a random peak value using weighted distribution
+func determineTargetPeak(rng *rand.Rand) float64 {
+	// Generate peak distribution:
+	// - Higher chance of low peaks (1.0x - 2.0x)
+	// - Lower chance of high peaks (2.0x - 100x+)
+
+	r := rng.Float64()
+
+	if r < 0.40 { // 40% chance: very low peaks (1.0x - 1.5x)
+		return 1.0 + rng.Float64()*0.5
+	} else if r < 0.70 { // 30% chance: low peaks (1.5x - 3.0x)
+		return 1.5 + rng.Float64()*1.5
+	} else if r < 0.88 { // 18% chance: medium peaks (3.0x - 10.0x)
+		return 3.0 + rng.Float64()*7.0
+	} else if r < 0.97 { // 9% chance: high peaks (10.0x - 50.0x)
+		return 10.0 + rng.Float64()*40.0
+	} else { // 3% chance: extreme peaks (50.0x - 200.0x)
+		return 50.0 + rng.Float64()*150.0
 	}
 }

@@ -403,12 +403,51 @@ func runCrashGameLoop() {
 			}
 		}(contractGameID.String())
 
+		// Broadcast updated history
+		updatedHistory := getCrashGameHistory()
+		crashBroadcast <- map[string]interface{}{
+			"type":    "crash_history",
+			"history": updatedHistory,
+		}
+		log.Printf("📜 Broadcasted updated crash history (%d games)", len(updatedHistory))
+
 		// Clear all active bettors for next game
 		ClearActiveBettors()
 
 		// Wait 10 seconds before next game
 		time.Sleep(10 * time.Second)
 	}
+}
+
+// mergeGroups merges candlestick groups when threshold is reached
+func mergeGroups(groups []game.CandleGroup, currentDuration int64) ([]game.CandleGroup, int64) {
+	// Simple merge: combine pairs
+	merged := make([]game.CandleGroup, 0, len(groups)/2+1)
+	newDuration := currentDuration * 2
+
+	for i := 0; i < len(groups); i += 2 {
+		if i+1 < len(groups) {
+			// Merge two groups
+			g1, g2 := groups[i], groups[i+1]
+			closeVal := *g2.Close
+			merged = append(merged, game.CandleGroup{
+				Open:       g1.Open,
+				Close:      &closeVal,
+				Max:        math.Max(g1.Max, g2.Max),
+				Min:        math.Min(g1.Min, g2.Min),
+				ValueList:  []float64{},
+				StartTime:  g1.StartTime,
+				DurationMs: newDuration,
+				IsComplete: true,
+			})
+		} else {
+			// Odd one out
+			merged = append(merged, groups[i])
+		}
+	}
+
+	log.Printf("🔄 Merged %d groups into %d (new duration: %dms)", len(groups), len(merged), newDuration)
+	return merged, newDuration
 }
 
 // AddActiveBettor adds a new bettor to the active list
@@ -427,7 +466,7 @@ func AddActiveBettor(address string, amount, multiplier float64) {
 	broadcastActiveBettors()
 }
 
-// RemoveActiveBettor removes a bettor from the active list (when they cash out)
+// RemoveActiveBettor removes a bettor from the active list
 func RemoveActiveBettor(address string) {
 	activeBettorsMutex.Lock()
 	defer activeBettorsMutex.Unlock()
@@ -439,7 +478,7 @@ func RemoveActiveBettor(address string) {
 	}
 }
 
-// ClearActiveBettors removes all bettors (called when game ends)
+// ClearActiveBettors removes all bettors
 func ClearActiveBettors() {
 	activeBettorsMutex.Lock()
 	defer activeBettorsMutex.Unlock()

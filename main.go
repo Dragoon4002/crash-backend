@@ -8,6 +8,7 @@ import (
 	"goLangServer/contract"
 	"goLangServer/db"
 	"goLangServer/ws"
+
 	"github.com/joho/godotenv"
 )
 
@@ -82,5 +83,28 @@ func main() {
 
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal("❌ Server error:", err)
+	}
+}
+
+// corsMiddleware adds CORS headers to allow frontend requests
+func corsMiddleware(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Set CORS headers
+		origin := r.Header.Get("Origin")
+		if origin == "" {
+			origin = "*"
+		}
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+
+		// Handle preflight OPTIONS request
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		handler(w, r)
 	}
 }
