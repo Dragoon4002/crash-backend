@@ -11,12 +11,10 @@ import (
 	"sync"
 	"time"
 
-	"goLangServer/config"
 	"goLangServer/contract"
 	"goLangServer/crypto"
 	"goLangServer/game"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/websocket"
 )
 
@@ -34,7 +32,7 @@ type Room struct {
 // CandleflipBatch represents a batch of rooms for a single player
 type CandleflipBatch struct {
 	BatchID        string
-	PlayerAddress  common.Address
+	PlayerAddress  string
 	AmountPerRoom  *big.Int
 	TotalRooms     int
 	PlayerSide     string // "bull" or "bear"
@@ -173,20 +171,20 @@ func CreateBatchFromData(address string, roomCount int, amountPerRoom string, si
 	}
 
 	// Parse amount
-	playerAddr := common.HexToAddress(address)
-	amountWei, ok := new(big.Int).SetString(amountPerRoom, 10)
+	playerAddr := address
+	amountStroops, ok := new(big.Int).SetString(amountPerRoom, 10)
 	if !ok {
 		return "", fmt.Errorf("invalid amount format")
 	}
 
 	// Create batch
-	batchID := fmt.Sprintf("batch-%s-%d", playerAddr.Hex()[:8], time.Now().UnixNano())
+	batchID := fmt.Sprintf("batch-%s-%d", playerAddr[:8], time.Now().UnixNano())
 	serverSeed, seedHash := crypto.GenerateServerSeed()
 
 	batch := &CandleflipBatch{
 		BatchID:        batchID,
 		PlayerAddress:  playerAddr,
-		AmountPerRoom:  amountWei,
+		AmountPerRoom:  amountStroops,
 		TotalRooms:     roomCount,
 		PlayerSide:     side,
 		Rooms:          make([]*Room, roomCount),
@@ -221,7 +219,7 @@ func CreateBatchFromData(address string, roomCount int, amountPerRoom string, si
 		"type": "batch_start",
 		"data": map[string]interface{}{
 			"batchId":        batchID,
-			"playerAddress":  playerAddr.Hex(),
+			"playerAddress":  playerAddr,
 			"totalRooms":     roomCount,
 			"amountPerRoom":  amountPerRoom,
 			"playerSide":     side,
@@ -400,7 +398,7 @@ func runCandleflipBatch(batch *CandleflipBatch) {
 // Payout winnings
 func payoutCandleflipWinnings(batch *CandleflipBatch) {
 	if batch.WonRooms == 0 {
-		log.Printf("❌ Player won 0 rooms, no payout for %s", batch.PlayerAddress.Hex())
+		log.Printf("❌ Player won 0 rooms, no payout for %s", batch.PlayerAddress)
 		
 		batch.mu.Lock()
 		batch.Status = "paid"
@@ -473,8 +471,8 @@ func payoutCandleflipWinnings(batch *CandleflipBatch) {
 	batch.Status = "paid"
 	batch.mu.Unlock()
 
-	payoutMNT := config.WeiToMNT(payout)
-	log.Printf("✅ Paid %s: %.4f MNT", batch.PlayerAddress.Hex(), payoutMNT)
+	payoutXLM := float64(payout.Int64()) / 1e7
+	log.Printf("✅ Paid %s: %.7f XLM", batch.PlayerAddress, payoutXLM)
 }
 
 // Helper functions

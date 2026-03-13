@@ -5,11 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/big"
 	"net/http"
-	"strings"
-
-	"github.com/ethereum/go-ethereum/common"
 )
 
 // GaslessCashOutRequest represents a request for gasless cashout
@@ -42,36 +38,17 @@ func HandleGaslessCashOut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate inputs
-	if !common.IsHexAddress(req.PlayerAddress) {
+	if req.PlayerAddress == "" {
 		sendJSONError(w, "Invalid player address", http.StatusBadRequest)
 		return
 	}
 
-	// Parse game ID
-	gameID, ok := new(big.Int).SetString(req.GameID, 10)
-	if !ok {
-		sendJSONError(w, "Invalid game ID", http.StatusBadRequest)
-		return
-	}
-
-	// Parse multiplier (comes in ether format, e.g., "2.5")
-	multiplierFloat, ok := new(big.Float).SetString(req.CurrentMultiplier)
-	if !ok {
-		sendJSONError(w, "Invalid multiplier", http.StatusBadRequest)
-		return
-	}
-
-	// Convert to wei (18 decimals)
-	multiplierWei, _ := multiplierFloat.Mul(multiplierFloat, big.NewFloat(1e18)).Int(nil)
-
-	playerAddr := common.HexToAddress(req.PlayerAddress)
-
 	log.Printf("🎮 Gasless cashout request from %s for game %s at %sx",
-		playerAddr.Hex(), gameID.String(), req.CurrentMultiplier)
+		req.PlayerAddress, req.GameID, req.CurrentMultiplier)
 
 	// Execute gasless cashout via relayer
 	ctx := context.Background()
-	txHash, payout, err := executeGaslessCashOut(ctx, playerAddr, gameID, multiplierWei, req.Signature)
+	txHash, payout, err := executeGaslessCashOut(ctx, req.PlayerAddress, req.GameID, req.CurrentMultiplier, req.Signature)
 
 	if err != nil {
 		log.Printf("❌ Gasless cashout failed: %v", err)
@@ -91,27 +68,9 @@ func HandleGaslessCashOut(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// executeGaslessCashOut executes the cashout via the relayer
-func executeGaslessCashOut(ctx context.Context, player common.Address, gameID *big.Int, multiplier *big.Int, signature string) (string, string, error) {
-	// TODO: Initialize relayer if not already done
-	// This would typically be done in main.go and passed here
-
-	// For now, return a mock response
-	// In production, this would call the actual relayer:
-	/*
-		tx, err := relayer.RelayCashOut(ctx, gameHouseContract, contract.CashOutRequest{
-			PlayerAddress:    player,
-			GameID:           gameID,
-			CurrentMultiplier: multiplier,
-			Signature:        common.FromHex(signature),
-		})
-		if err != nil {
-			return "", "", err
-		}
-		return tx.Hash().Hex(), "1.234", nil
-	*/
-
-	return "0x" + strings.Repeat("0", 64), "0.000", fmt.Errorf("relayer not implemented yet - deploy contract first")
+// executeGaslessCashOut executes the cashout via the relayer (stub — not implemented for Stellar)
+func executeGaslessCashOut(_ context.Context, player, gameID, multiplier, _ string) (string, string, error) {
+	return "", "0.000", fmt.Errorf("gasless cashout not implemented for Stellar (player=%s game=%s mult=%s)", player, gameID, multiplier)
 }
 
 // Helper function to send JSON responses

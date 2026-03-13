@@ -53,14 +53,14 @@ func main() {
 	http.HandleFunc("/ws", ws.HandleUnifiedWS)
 	http.HandleFunc("/candleflip", ws.HandleCandleflipWS)
 
-	// API endpoints
-	http.HandleFunc("/api/crash", api.HandleGetCrashHistory)
-	http.HandleFunc("/api/crash/", api.HandleGetCrashGameDetail) // Trailing slash for :gameId
-	http.HandleFunc("/api/health", api.HandleHealthCheck)
-	http.HandleFunc("/api/bettor/add", api.HandleAddBettor)
-	http.HandleFunc("/api/bettor/remove", api.HandleRemoveBettor)
-	http.HandleFunc("/api/bettor/list", api.HandleGetActiveBettors)
-	http.HandleFunc("/api/leaderboard", api.HandleGetLeaderboard)
+	// API endpoints (wrapped with CORS middleware)
+	http.HandleFunc("/api/crash", corsMiddleware(api.HandleGetCrashHistory))
+	http.HandleFunc("/api/crash/", corsMiddleware(api.HandleGetCrashGameDetail)) // Trailing slash for :gameId
+	http.HandleFunc("/api/health", corsMiddleware(api.HandleHealthCheck))
+	http.HandleFunc("/api/bettor/add", corsMiddleware(api.HandleAddBettor))
+	http.HandleFunc("/api/bettor/remove", corsMiddleware(api.HandleRemoveBettor))
+	http.HandleFunc("/api/bettor/list", corsMiddleware(api.HandleGetActiveBettors))
+	http.HandleFunc("/api/leaderboard", corsMiddleware(api.HandleGetLeaderboard))
 
 	addr := "0.0.0.0:8080"
 	log.Printf("🚀 Server starting on %s", addr)

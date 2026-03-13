@@ -71,7 +71,7 @@ func HandleGetAllBatches(w http.ResponseWriter, r *http.Request) {
 		
 		batchResp := BatchResponse{
 			BatchID:        batch.BatchID,
-			PlayerAddress:  batch.PlayerAddress.Hex(),
+			PlayerAddress:  batch.PlayerAddress,
 			AmountPerRoom:  batch.AmountPerRoom.String(),
 			TotalRooms:     batch.TotalRooms,
 			PlayerSide:     batch.PlayerSide,
@@ -144,7 +144,7 @@ func HandleGetBatchByID(w http.ResponseWriter, r *http.Request) {
 
 	batchResp := BatchResponse{
 		BatchID:        batch.BatchID,
-		PlayerAddress:  batch.PlayerAddress.Hex(),
+		PlayerAddress:  batch.PlayerAddress,
 		AmountPerRoom:  batch.AmountPerRoom.String(),
 		TotalRooms:     batch.TotalRooms,
 		PlayerSide:     batch.PlayerSide,

@@ -14,7 +14,6 @@ import (
 	"goLangServer/contract"
 	"goLangServer/db"
 
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/gorilla/websocket"
 )
 
@@ -575,15 +574,12 @@ func handleCrashCashout(client *ClientConnection, data map[string]interface{}) {
 	log.Printf("💳 Contract client available: %v", hasContract)
 
 	if hasContract {
-		// Convert payout amount to wei (18 decimals)
-		// payoutAmount is in MNT (ether), convert to wei
-		payoutWei := new(big.Float).Mul(big.NewFloat(payoutAmount), big.NewFloat(1e18))
+		// Convert payout amount to stroops (7 decimals, 1 XLM = 10_000_000 stroops)
+		payoutStroops := new(big.Float).Mul(big.NewFloat(payoutAmount), big.NewFloat(1e7))
 		payoutBigInt := new(big.Int)
-		payoutWei.Int(payoutBigInt)
+		payoutStroops.Int(payoutBigInt)
 
-		playerAddr := common.HexToAddress(playerAddress)
-
-		log.Printf("💸 Calling payPlayer contract - Player: %s, PayoutWei: %s", playerAddr.Hex(), payoutBigInt.String())
+		log.Printf("💸 Calling payPlayer contract - Player: %s, PayoutStroops: %s", playerAddress, payoutBigInt.String())
 
 		// Call contract (async, don't block game flow)
 		go func() {
@@ -595,7 +591,7 @@ func handleCrashCashout(client *ClientConnection, data map[string]interface{}) {
 			contractClientMutex.RUnlock()
 
 			log.Printf("🔄 Executing contract.PayPlayer...")
-			err := client.PayPlayer(ctx, playerAddr, payoutBigInt)
+			err := client.PayPlayer(ctx, playerAddress, payoutBigInt)
 			if err != nil {
 				log.Printf("❌ Failed to call payPlayer contract: %v", err)
 				// Don't block user experience - they still get credited in DB
@@ -640,24 +636,14 @@ func handleCrashCashout(client *ClientConnection, data map[string]interface{}) {
 }
 
 func sendPrivateMessage(client *ClientConnection, userId string, message map[string]interface{}) {
-	// Find client by userId and send message only to them
-	clientsMutex.RLock()
-	defer clientsMutex.RUnlock()
-
-	for c := range clients {
-		if c.ID == userId {
-			data, err := json.Marshal(message)
-			if err != nil {
-				log.Printf("⚠️  Failed to marshal private message: %v", err)
-				return
-			}
-			c.Send <- data
-			log.Printf("✉️  Sent private message to user %s", userId)
-			return
-		}
+	// Send directly to the requesting client connection
+	data, err := json.Marshal(message)
+	if err != nil {
+		log.Printf("⚠️  Failed to marshal private message: %v", err)
+		return
 	}
-
-	log.Printf("⚠️  User %s not found for private message", userId)
+	client.Send <- data
+	log.Printf("✉️  Sent private message to client %s (userId: %s)", client.ID, userId)
 }
 
 func min(a, b int) int {
